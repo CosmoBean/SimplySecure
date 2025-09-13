@@ -203,13 +203,13 @@ struct DashboardView: View {
                 
                 Spacer()
                 
-                Text("\(securityScanner.totalScore)/100")
+                Text("\(securityScanner.totalScore)/120")
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(securityScoreColor)
             }
             
-            ProgressView(value: Double(securityScanner.totalScore), total: 100)
+            ProgressView(value: Double(securityScanner.totalScore), total: 120)
                 .progressViewStyle(LinearProgressViewStyle(tint: securityScoreColor))
                 .frame(height: 8)
             
@@ -329,6 +329,18 @@ struct DashboardView: View {
                 Text(result.message)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                
+                if !result.passed {
+                    HStack(spacing: 4) {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.blue)
+                            .font(.caption)
+                        Text(result.fixInstructions)
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    .padding(.top, 2)
+                }
             }
             
             Spacer()
@@ -340,17 +352,17 @@ struct DashboardView: View {
                     .foregroundColor(result.passed ? .green : .red)
                 
                 if !result.passed {
-                    Button("Fix Now") {
-                        print("🔧 ContentView: Fix Now clicked for \(result.name)")
-                        securityScanner.fixSecurityIssue(result)
+                    Button("Test Again") {
+                        print("🔧 ContentView: Test Again clicked for \(result.name)")
+                        securityScanner.performSecurityScan()
                     }
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(securityScanner.isFixing ? Color.gray : Color.red)
+                    .background(securityScanner.isScanning ? Color.gray : Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(6)
-                    .disabled(securityScanner.isFixing)
+                    .disabled(securityScanner.isScanning)
                 }
             }
         }
@@ -402,17 +414,19 @@ struct DashboardView: View {
     // MARK: - Computed Properties
     private var securityScoreColor: Color {
         switch securityScanner.totalScore {
-        case 80...100: return .green
-        case 60..<80: return .orange
+        case 100...120: return .green
+        case 80..<100: return .orange
+        case 60..<80: return .yellow
         default: return .red
         }
     }
     
     private var securityScoreMessage: String {
         switch securityScanner.totalScore {
-        case 80...100: return "Excellent security posture! 🥷"
-        case 60..<80: return "Good security, but room for improvement"
-        case 40..<60: return "Security needs attention"
+        case 100...120: return "Excellent security posture! 🥷"
+        case 80..<100: return "Good security, but room for improvement"
+        case 60..<80: return "Security needs attention"
+        case 40..<60: return "Multiple security issues detected"
         default: return "Critical security issues detected!"
         }
     }
