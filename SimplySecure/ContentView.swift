@@ -158,6 +158,61 @@ struct ContentView: View {
     }
 }
 
+// MARK: - Flame Animation Component
+struct FlameAnimation: View {
+    @State private var animationOffset: CGFloat = 0
+    @State private var animationScale: CGFloat = 1.0
+    @State private var animationOpacity: Double = 0.7
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<6, id: \.self) { index in
+                flameView(for: index)
+            }
+        }
+        .onAppear {
+            startAnimation()
+        }
+    }
+    
+    private func flameView(for index: Int) -> some View {
+        let angle = Double(index) * .pi / 3
+        let radius = 25 + animationOffset
+        let xOffset = cos(angle) * radius
+        let yOffset = sin(angle) * radius - 5
+        
+        return Image(systemName: "flame.fill")
+            .font(.system(size: CGFloat(8 + index * 2)))
+            .foregroundColor(flameColor(for: index))
+            .offset(x: xOffset, y: yOffset)
+            .scaleEffect(animationScale)
+            .opacity(animationOpacity)
+            .animation(
+                .easeInOut(duration: 0.8 + Double(index) * 0.1)
+                .repeatForever(autoreverses: true)
+                .delay(Double(index) * 0.1),
+                value: animationOffset
+            )
+    }
+    
+    private func flameColor(for index: Int) -> Color {
+        switch index % 3 {
+        case 0: return .orange
+        case 1: return .red
+        case 2: return .yellow
+        default: return .orange
+        }
+    }
+    
+    private func startAnimation() {
+        withAnimation {
+            animationOffset = 8
+            animationScale = 1.3
+            animationOpacity = 1.0
+        }
+    }
+}
+
 // MARK: - Dashboard View
 struct DashboardView: View {
     @ObservedObject var securityScanner: SecurityScanner
@@ -186,15 +241,24 @@ struct DashboardView: View {
     // MARK: - Header View
     private var headerView: some View {
         HStack {
-            // Ninja Avatar
-            Image(systemName: "person.fill")
-                .font(.system(size: 60))
-                .foregroundColor(gameModel.currentLevel.color)
-                .background(
-                    Circle()
-                        .fill(Color(NSColor.controlBackgroundColor))
-                        .frame(width: 80, height: 80)
-                )
+            // Ninja Avatar with optional flames for Master level
+            ZStack {
+                Image(gameModel.currentLevel.profileImageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(gameModel.currentLevel.color, lineWidth: 3)
+                    )
+                
+                // Add flame animation for Master Ninja
+                if gameModel.currentLevel == .master {
+                    FlameAnimation()
+                        .frame(width: 150, height: 150)
+                }
+            }
             
             VStack(alignment: .leading, spacing: 8) {
                 Text(gameModel.currentLevel.rawValue)
@@ -543,15 +607,24 @@ struct AccountView: View {
     
     private var profileHeader: some View {
         VStack(spacing: 20) {
-            // Large Avatar
-            Image(systemName: "person.fill")
-                .font(.system(size: 120))
-                .foregroundColor(gameModel.currentLevel.color)
-                .background(
-                    Circle()
-                        .fill(Color(NSColor.controlBackgroundColor))
-                        .frame(width: 140, height: 140)
-                )
+            // Large Avatar with optional flames for Master level
+            ZStack {
+                Image(gameModel.currentLevel.profileImageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 140, height: 140)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(gameModel.currentLevel.color, lineWidth: 4)
+                    )
+                
+                // Add flame animation for Master Ninja
+                if gameModel.currentLevel == .master {
+                    FlameAnimation()
+                        .frame(width: 220, height: 220)
+                }
+            }
             
             VStack(spacing: 8) {
                 Text(gameModel.currentLevel.rawValue)
@@ -1214,8 +1287,6 @@ struct GeminiTestView: View {
     @State private var prompt = "Explain cybersecurity best practices for macOS users in simple terms."
     @State private var temperature: Double = 0.7
     @State private var maxTokens: Int = 1000
-    @State private var apiKeyInput = ""
-    @State private var showingAPIKeyDialog = false
     
     var body: some View {
         ScrollView {
@@ -1270,23 +1341,9 @@ struct GeminiTestView: View {
     
     private var apiKeyView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("API Configuration")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                Button("Configure API Key") {
-                    showingAPIKeyDialog = true
-                }
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(6)
-            }
+            Text("API Configuration")
+                .font(.headline)
+                .fontWeight(.semibold)
             
             HStack {
                 Image(systemName: GeminiConfig.shared.isConfigured ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
@@ -1300,9 +1357,31 @@ struct GeminiTestView: View {
             }
             
             if !GeminiConfig.shared.isConfigured {
-                Text("Set your Gemini API key as an environment variable: GEMINI_API_KEY")
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("To configure your Gemini API key:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("1. Add GEMINI_API_KEY=your_key_here to your .env file")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 8)
+                    
+                    Text("2. Get your API key from: https://makersuite.google.com/app/apikey")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 8)
+                    
+                    Text("3. Restart the app to load the new configuration")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 8)
+                }
+                .padding(.top, 4)
+            } else {
+                Text("✅ API key loaded from .env file")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.green)
                     .padding(.top, 4)
             }
         }
@@ -1311,16 +1390,6 @@ struct GeminiTestView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(NSColor.controlBackgroundColor))
         )
-        .alert("API Key Configuration", isPresented: $showingAPIKeyDialog) {
-            TextField("Enter API Key", text: $apiKeyInput)
-            Button("Save") {
-                // In a real app, you'd save this securely
-                // For now, we'll just show a message
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Enter your Google Gemini API key. You can get one from the Google AI Studio.")
-        }
     }
     
     private var promptInputView: some View {

@@ -31,6 +31,14 @@ enum NinjaLevel: String, CaseIterable {
         case .master: return .black
         }
     }
+    
+    var profileImageName: String {
+        switch self {
+        case .novice: return "1"
+        case .apprentice: return "2"
+        case .master: return "3"
+        }
+    }
 }
 
 // MARK: - Mission System

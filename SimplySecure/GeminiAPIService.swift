@@ -156,17 +156,61 @@ class GeminiConfig {
     private init() {}
     
     var apiKey: String {
-        // In a real app, you'd want to store this securely
-        // For now, we'll use an environment variable or placeholder
-        if let key = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !key.isEmpty {
-            return key
+        // Simple approach: try to read from .env file first
+        if let envKey = readFromEnvFile() {
+            return envKey
         }
         
-        // Fallback to a placeholder - user should set their own key
-        return "YOUR_GEMINI_API_KEY_HERE"
+        // Fallback to environment variable
+        if let envVar = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envVar.isEmpty {
+            return envVar
+        }
+        
+        // Fallback to placeholder
+        return "xxxxx"
     }
     
     var isConfigured: Bool {
-        return apiKey != "YOUR_GEMINI_API_KEY_HERE" && !apiKey.isEmpty
+        let key = apiKey
+        return key != "xxxxx" && !key.isEmpty
+    }
+    
+    private func readFromEnvFile() -> String? {
+        // Look for .env file in current directory
+        let currentDir = FileManager.default.currentDirectoryPath
+        let envPath = "\(currentDir)/.env"
+        
+        guard FileManager.default.fileExists(atPath: envPath) else {
+            return nil
+        }
+        
+        do {
+            let content = try String(contentsOfFile: envPath, encoding: .utf8)
+            let lines = content.components(separatedBy: .newlines)
+            
+            for line in lines {
+                let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                // Skip empty lines and comments
+                if trimmedLine.isEmpty || trimmedLine.hasPrefix("#") {
+                    continue
+                }
+                
+                // Look for GEMINI_API_KEY=
+                if trimmedLine.hasPrefix("GEMINI_API_KEY=") {
+                    let key = String(trimmedLine.dropFirst(16)) // Remove "GEMINI_API_KEY="
+                    let cleanKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+                    
+                    // Return the key if it's not empty and not a placeholder
+                    if !cleanKey.isEmpty && !cleanKey.contains("your_") {
+                        return cleanKey
+                    }
+                }
+            }
+        } catch {
+            print("Error reading .env file: \(error)")
+        }
+        
+        return nil
     }
 }
