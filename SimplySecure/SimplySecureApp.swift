@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct SimplySecureApp: App {
@@ -8,5 +9,6 @@ struct SimplySecureApp: App {
         }
         .windowStyle(DefaultWindowStyle())
         .windowResizability(.contentSize)
+        .modelContainer(for: User.self)
     }
 }

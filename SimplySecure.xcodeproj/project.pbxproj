@@ -12,6 +12,8 @@
 		E1234567890ABCDEF1234567 /* SecurityScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1234567890ABCDEF1234567 /* SecurityScanner.swift */; };
 		G1234567890ABCDEF1234567 /* NinjaGameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1234567890ABCDEF1234567 /* NinjaGameModel.swift */; };
 		I1234567890ABCDEF1234567 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = J1234567890ABCDEF1234567 /* Assets.xcassets */; };
+		AA1234567890ABCDEF1234567 /* GeminiAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1234567890ABCDEF1234567 /* GeminiAPIService.swift */; };
+		CC1234567890ABCDEF1234567 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1234567890ABCDEF1234567 /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,8 +22,8 @@
 		F1234567890ABCDEF1234567 /* SecurityScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScanner.swift; sourceTree = "<group>"; };
 		H1234567890ABCDEF1234567 /* NinjaGameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NinjaGameModel.swift; sourceTree = "<group>"; };
 		J1234567890ABCDEF1234567 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		K1234567890ABCDEF1234567 /* SimplySecure.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplySecure.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		L1234567890ABCDEF1234567 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BB1234567890ABCDEF1234567 /* GeminiAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiAPIService.swift; sourceTree = "<group>"; };
+		DD1234567890ABCDEF1234567 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +52,8 @@
 				D1234567890ABCDEF1234567 /* ContentView.swift */,
 				F1234567890ABCDEF1234567 /* SecurityScanner.swift */,
 				H1234567890ABCDEF1234567 /* NinjaGameModel.swift */,
+				BB1234567890ABCDEF1234567 /* GeminiAPIService.swift */,
+				DD1234567890ABCDEF1234567 /* User.swift */,
 				J1234567890ABCDEF1234567 /* Assets.xcassets */,
 				L1234567890ABCDEF1234567 /* Info.plist */,
 			);
@@ -133,10 +137,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C1234567890ABCDEF1234567 /* ContentView.swift in Sources */,
 				A1234567890ABCDEF1234567 /* SimplySecureApp.swift in Sources */,
+				C1234567890ABCDEF1234567 /* ContentView.swift in Sources */,
 				E1234567890ABCDEF1234567 /* SecurityScanner.swift in Sources */,
 				G1234567890ABCDEF1234567 /* NinjaGameModel.swift in Sources */,
+				AA1234567890ABCDEF1234567 /* GeminiAPIService.swift in Sources */,
+				CC1234567890ABCDEF1234567 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

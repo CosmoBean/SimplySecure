@@ -24,6 +24,9 @@ class SecurityScanner: ObservableObject {
     @Published var currentFixStep: String = ""
     @Published var fixProgress: Double = 0.0
     
+    // Reference to game model for XP awarding
+    weak var gameModel: NinjaGameModel?
+    
     func performSecurityScan() {
         NSLog("🥷 SecurityScanner: Starting security scan...")
         isScanning = true
@@ -105,6 +108,10 @@ class SecurityScanner: ObservableObject {
                 self.currentScanStep = "Scan Complete!"
                 self.scanProgress = 1.0
                 self.calculateTotalScore()
+                
+                // Award XP for passed scans
+                self.awardXPForPassedScans()
+                
                 self.isScanning = false
                 NSLog("🥷 SecurityScanner: Final results: \(self.scanResults)")
                 
@@ -146,6 +153,12 @@ class SecurityScanner: ObservableObject {
                 if let index = self.scanResults.firstIndex(where: { $0.name == checkName }) {
                     self.scanResults[index] = newResult
                     self.calculateTotalScore()
+                    
+                    // Award XP if the scan now passes (either for the first time or on retry)
+                    if newResult.passed {
+                        self.awardXPForPassedScan(newResult)
+                    }
+                    
                     NSLog("🔧 SecurityScanner: Updated \(checkName) result: \(newResult.passed ? "PASS" : "FAIL")")
                 }
             }
@@ -355,6 +368,48 @@ class SecurityScanner: ObservableObject {
         totalScore = scanResults.reduce(0) { $0 + ($1.passed ? $1.points : 0) }
     }
     
+    // MARK: - XP Awarding System
+    
+    private func awardXPForPassedScans() {
+        guard let gameModel = gameModel else {
+            NSLog("🥷 XP: No gameModel reference available")
+            return
+        }
+        
+        let passedScans = scanResults.filter { $0.passed }
+        var totalXP = 0
+        
+        for result in passedScans {
+            let xp = calculateXPForScan(result)
+            totalXP += xp
+            NSLog("🥷 XP: Awarded \(xp) XP for passing \(result.name)")
+        }
+        
+        if totalXP > 0 {
+            gameModel.addXP(totalXP)
+            NSLog("🥷 XP: Total XP awarded: \(totalXP)")
+        }
+    }
+    
+    private func awardXPForPassedScan(_ result: SecurityScanResult) {
+        guard let gameModel = gameModel else {
+            NSLog("🥷 XP: No gameModel reference available")
+            return
+        }
+        
+        let xp = calculateXPForScan(result)
+        gameModel.addXP(xp)
+        NSLog("🥷 XP: Awarded \(xp) XP for passing \(result.name)")
+    }
+    
+    private func calculateXPForScan(_ result: SecurityScanResult) -> Int {
+        // Base XP is 10 points for each scan that passes
+        // Additional bonus based on the security importance of the scan
+        let baseXP = 10
+        let bonusXP = result.points / 4 // Convert security points to bonus XP (roughly)
+        return baseXP + bonusXP
+    }
+    
     // MARK: - Fix Functionality
     func fixSecurityIssue(_ result: SecurityScanResult) {
         NSLog("🔧 SecurityScanner: Starting fix for \(result.name)")
@@ -560,11 +615,17 @@ class SecurityScanner: ObservableObject {
     
     private func updateScanResult(_ name: String, passed: Bool, message: String? = nil) {
         if let index = scanResults.firstIndex(where: { $0.name == name }) {
+            let oldResult = scanResults[index]
             scanResults[index].passed = passed
             if let newMessage = message {
                 scanResults[index].message = newMessage
             }
             calculateTotalScore()
+            
+            // Award XP if the scan now passes (due to a fix)
+            if passed && !oldResult.passed {
+                awardXPForPassedScan(scanResults[index])
+            }
         }
     }
     

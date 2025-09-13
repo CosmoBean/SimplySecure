@@ -1,123 +1,141 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @StateObject private var securityScanner = SecurityScanner()
     @StateObject private var gameModel = NinjaGameModel()
     @State private var selectedTab: Tab = .dashboard
     @State private var testCounter = 0
+    @Environment(\.modelContext) private var modelContext
     
     enum Tab: String, CaseIterable {
         case dashboard = "Dashboard"
         case account = "Account"
         case reports = "Reports"
         case terminal = "Terminal Test"
+        case gemini = "AI Assistant"
     }
     
     var body: some View {
         NavigationSplitView {
-            // MARK: - Sidebar
-            VStack(alignment: .leading, spacing: 0) {
-                // Header
-                HStack {
-                    Image(systemName: "shield.checkered")
-                        .font(.title2)
-                        .foregroundColor(.red)
-                    Text("SimplySecure")
+            sidebarView
+        } detail: {
+            mainContentView
+        }
+    }
+    
+    private var sidebarView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            headerSection
+            Divider()
+            navigationSection
+            Spacer()
+            quickStatsSection
+        }
+        .frame(minWidth: 200)
+        .background(Color(NSColor.controlBackgroundColor))
+    }
+    
+    private var headerSection: some View {
+        HStack {
+            Image(systemName: "shield.checkered")
+                .font(.title2)
+                .foregroundColor(.red)
+            Text("SimplySecure")
+                .font(.title2)
+                .fontWeight(.bold)
+        }
+        .padding()
+    }
+    
+    private var navigationSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(Tab.allCases, id: \.self) { tab in
+                Button(action: {
+                    selectedTab = tab
+                }) {
+                    HStack {
+                        Image(systemName: tabIcon(for: tab))
+                            .foregroundColor(selectedTab == tab ? .white : .primary)
+                        Text(tab.rawValue)
+                            .foregroundColor(selectedTab == tab ? .white : .primary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedTab == tab ? Color.red : Color.clear)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .padding(.horizontal)
+        .padding(.top)
+    }
+    
+    private var quickStatsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Quick Stats")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .padding(.horizontal)
+            
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Security Score")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("\(securityScanner.totalScore)/140")
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(securityScoreColor)
                 }
-                .padding()
-                
-                Divider()
-                
-                // Navigation
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(Tab.allCases, id: \.self) { tab in
-                        Button(action: {
-                            selectedTab = tab
-                        }) {
-                            HStack {
-                                Image(systemName: tabIcon(for: tab))
-                                    .foregroundColor(selectedTab == tab ? .white : .primary)
-                                Text(tab.rawValue)
-                                    .foregroundColor(selectedTab == tab ? .white : .primary)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(selectedTab == tab ? Color.red : Color.clear)
-                            )
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.top)
                 
                 Spacer()
                 
-                // Quick Stats
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Quick Stats")
-                        .font(.headline)
+                VStack(alignment: .trailing) {
+                    Text("Level")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(gameModel.currentLevel.rawValue)
+                        .font(.caption)
                         .fontWeight(.semibold)
-                        .padding(.horizontal)
-                    
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("Security Score")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("\(securityScanner.totalScore)/140")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(securityScoreColor)
-                        }
-                        
-                        Spacer()
-                        
-                        VStack(alignment: .trailing) {
-                            Text("Level")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text(gameModel.currentLevel.rawValue)
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(gameModel.currentLevel.color)
-                        }
-                    }
-                    .padding(.horizontal)
+                        .foregroundColor(gameModel.currentLevel.color)
                 }
-                .padding(.bottom)
             }
-            .frame(minWidth: 200)
-            .background(Color(NSColor.controlBackgroundColor))
+            .padding(.horizontal)
+        }
+        .padding(.bottom)
+    }
+    
+    private var mainContentView: some View {
+        Group {
+            switch selectedTab {
+            case .dashboard:
+                DashboardView(securityScanner: securityScanner, gameModel: gameModel, testCounter: $testCounter)
+            case .account:
+                AccountView(gameModel: gameModel)
+            case .reports:
+                ReportsView(securityScanner: securityScanner)
+            case .terminal:
+                TerminalTestView()
+            case .gemini:
+                GeminiTestView()
+            }
+        }
+        .frame(minWidth: 600, minHeight: 500)
+        .onAppear {
+            // Initialize SwiftData for gameModel
+            gameModel.setup(with: modelContext)
             
-        } detail: {
-            // MARK: - Main Content
-            Group {
-                switch selectedTab {
-                case .dashboard:
-                    DashboardView(securityScanner: securityScanner, gameModel: gameModel, testCounter: $testCounter)
-                case .account:
-                    AccountView(gameModel: gameModel)
-                case .reports:
-                    ReportsView(securityScanner: securityScanner)
-                case .terminal:
-                    TerminalTestView()
-                }
-            }
-            .frame(minWidth: 600, minHeight: 500)
-            .onAppear {
-                // Connect SecurityScanner with NinjaGameModel for XP awarding
-                NSLog("📱 ContentView: onAppear called")
-                NSLog("📱 ContentView: SecurityScanner gameModel before: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
-                securityScanner.gameModel = gameModel
-                NSLog("📱 ContentView: SecurityScanner gameModel after: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
-                NSLog("📱 ContentView: GameModel currentXP: \(gameModel.currentXP)")
-            }
+            // Connect SecurityScanner with NinjaGameModel for XP awarding
+            NSLog("📱 ContentView: onAppear called")
+            NSLog("📱 ContentView: SecurityScanner gameModel before: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
+            securityScanner.gameModel = gameModel
+            NSLog("📱 ContentView: SecurityScanner gameModel after: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
+            NSLog("📱 ContentView: GameModel currentXP: \(gameModel.currentXP)")
         }
     }
     
@@ -127,6 +145,7 @@ struct ContentView: View {
         case .account: return "person.circle.fill"
         case .reports: return "chart.bar.fill"
         case .terminal: return "terminal.fill"
+        case .gemini: return "brain.head.profile"
         }
     }
     
@@ -189,7 +208,7 @@ struct DashboardView: View {
                     .onAppear {
                         NSLog("📱 DashboardView: Header XP display appeared with \(gameModel.currentXP) XP")
                     }
-                    .onChange(of: gameModel.currentXP) { newValue in
+                    .onChange(of: gameModel.currentXP) { _, newValue in
                         NSLog("📱 DashboardView: Header XP changed to \(newValue)")
                     }
                 
@@ -206,6 +225,46 @@ struct DashboardView: View {
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(4)
+                
+                // Demo Controls
+                VStack(spacing: 4) {
+                    Text("Demo Controls")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.orange)
+                    
+                    HStack(spacing: 4) {
+                        Button("Reset XP") {
+                            NSLog("🎮 Demo: Reset XP button clicked")
+                            gameModel.resetUserXP()
+                        }
+                        .font(.caption2)
+                        .padding(2)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(3)
+                        
+                        Button("Set Apprentice") {
+                            NSLog("🎮 Demo: Set Apprentice button clicked")
+                            gameModel.setDemoLevel("Apprentice Ninja")
+                        }
+                        .font(.caption2)
+                        .padding(2)
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(3)
+                        
+                        Button("Set Master") {
+                            NSLog("🎮 Demo: Set Master button clicked")
+                            gameModel.setDemoLevel("Master Ninja")
+                        }
+                        .font(.caption2)
+                        .padding(2)
+                        .background(Color.purple)
+                        .foregroundColor(.white)
+                        .cornerRadius(3)
+                    }
+                }
             }
             
             Spacer()
@@ -1145,6 +1204,307 @@ struct TerminalTestView: View {
                     self.isRunning = false
                 }
             }
+        }
+    }
+}
+
+// MARK: - Gemini Test View
+struct GeminiTestView: View {
+    @StateObject private var geminiService = GeminiAPIService(apiKey: GeminiConfig.shared.apiKey)
+    @State private var prompt = "Explain cybersecurity best practices for macOS users in simple terms."
+    @State private var temperature: Double = 0.7
+    @State private var maxTokens: Int = 1000
+    @State private var apiKeyInput = ""
+    @State private var showingAPIKeyDialog = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Header
+                headerView
+                
+                // API Key Configuration
+                apiKeyView
+                
+                // Prompt Input
+                promptInputView
+                
+                // Settings
+                settingsView
+                
+                // Generate Button
+                generateButtonView
+                
+                // Response Display
+                responseView
+                
+                // Examples
+                examplesView
+            }
+            .padding()
+        }
+    }
+    
+    private var headerView: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "brain.head.profile")
+                    .font(.title)
+                    .foregroundColor(.purple)
+                Text("AI Assistant (Gemini)")
+                    .font(.title)
+                    .fontWeight(.bold)
+            }
+            
+            Text("Test Google Gemini API integration for AI-powered security insights")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var apiKeyView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("API Configuration")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Button("Configure API Key") {
+                    showingAPIKeyDialog = true
+                }
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(6)
+            }
+            
+            HStack {
+                Image(systemName: GeminiConfig.shared.isConfigured ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                    .foregroundColor(GeminiConfig.shared.isConfigured ? .green : .orange)
+                
+                Text(GeminiConfig.shared.isConfigured ? "API Key Configured" : "API Key Required")
+                    .font(.subheadline)
+                    .foregroundColor(GeminiConfig.shared.isConfigured ? .green : .orange)
+                
+                Spacer()
+            }
+            
+            if !GeminiConfig.shared.isConfigured {
+                Text("Set your Gemini API key as an environment variable: GEMINI_API_KEY")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.top, 4)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+        .alert("API Key Configuration", isPresented: $showingAPIKeyDialog) {
+            TextField("Enter API Key", text: $apiKeyInput)
+            Button("Save") {
+                // In a real app, you'd save this securely
+                // For now, we'll just show a message
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Enter your Google Gemini API key. You can get one from the Google AI Studio.")
+        }
+    }
+    
+    private var promptInputView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Prompt")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            TextEditor(text: $prompt)
+                .font(.system(.body, design: .monospaced))
+                .frame(minHeight: 100)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.black.opacity(0.05))
+                )
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var settingsView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Settings")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Temperature:")
+                        .font(.subheadline)
+                    Spacer()
+                    Text("\(temperature, specifier: "%.1f")")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Slider(value: $temperature, in: 0.0...2.0, step: 0.1)
+                    .accentColor(.purple)
+                
+                HStack {
+                    Text("Max Tokens:")
+                        .font(.subheadline)
+                    Spacer()
+                    TextField("1000", value: $maxTokens, format: .number)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 80)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var generateButtonView: some View {
+        Button(action: generateResponse) {
+            HStack {
+                if geminiService.isLoading {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .foregroundColor(.white)
+                } else {
+                    Image(systemName: "sparkles")
+                }
+                Text(geminiService.isLoading ? "Generating..." : "Generate Response")
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(geminiService.isLoading ? Color.orange : Color.purple)
+            )
+        }
+        .disabled(geminiService.isLoading || !GeminiConfig.shared.isConfigured)
+    }
+    
+    private var responseView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("AI Response")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            ScrollView {
+                if geminiService.isLoading {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Generating response...")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+                } else if !geminiService.lastResponse.isEmpty {
+                    Text(geminiService.lastResponse)
+                        .font(.system(.body, design: .default))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.black.opacity(0.05))
+                        )
+                } else if !geminiService.errorMessage.isEmpty {
+                    Text("Error: \(geminiService.errorMessage)")
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.red.opacity(0.1))
+                        )
+                } else {
+                    Text("No response yet. Click 'Generate Response' to get AI insights.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                }
+            }
+            .frame(minHeight: 200, maxHeight: 400)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var examplesView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Example Prompts")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                examplePrompt("Explain cybersecurity best practices for macOS users in simple terms.")
+                examplePrompt("What are the most common security vulnerabilities in macOS applications?")
+                examplePrompt("How can I improve my system's security posture?")
+                examplePrompt("Explain FileVault encryption and its benefits.")
+                examplePrompt("What is two-factor authentication and why is it important?")
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private func examplePrompt(_ text: String) -> some View {
+        Button(action: {
+            prompt = text
+        }) {
+            HStack {
+                Text(text)
+                    .font(.caption)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                Spacer()
+                Image(systemName: "arrow.up.left")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+            }
+            .padding(.vertical, 4)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func generateResponse() {
+        Task {
+            await geminiService.generateText(
+                prompt: prompt,
+                temperature: temperature,
+                maxTokens: maxTokens
+            )
         }
     }
 }
