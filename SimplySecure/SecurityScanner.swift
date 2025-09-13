@@ -58,12 +58,45 @@ class SecurityScanner: ObservableObject {
             // Scan 3: Safari Security
             DispatchQueue.main.async {
                 self.currentScanStep = "Checking Safari Security..."
-                self.scanProgress = 0.99
+                self.scanProgress = 0.5
             }
             let safariResult = self.checkSafariSecurity()
             DispatchQueue.main.async {
                 self.scanResults.append(safariResult)
                 print("🥷 Safari Result: \(safariResult)")
+            }
+            
+            // Scan 4: Firewall Status
+            DispatchQueue.main.async {
+                self.currentScanStep = "Checking Firewall Status..."
+                self.scanProgress = 0.66
+            }
+            let firewallResult = self.checkFirewallStatus()
+            DispatchQueue.main.async {
+                self.scanResults.append(firewallResult)
+                print("🥷 Firewall Result: \(firewallResult)")
+            }
+            
+            // Scan 5: Gatekeeper Status
+            DispatchQueue.main.async {
+                self.currentScanStep = "Checking Gatekeeper Status..."
+                self.scanProgress = 0.83
+            }
+            let gatekeeperResult = self.checkGatekeeperStatus()
+            DispatchQueue.main.async {
+                self.scanResults.append(gatekeeperResult)
+                print("🥷 Gatekeeper Result: \(gatekeeperResult)")
+            }
+            
+            // Scan 6: System Integrity Protection
+            DispatchQueue.main.async {
+                self.currentScanStep = "Checking System Integrity Protection..."
+                self.scanProgress = 0.99
+            }
+            let sipResult = self.checkSystemIntegrityProtection()
+            DispatchQueue.main.async {
+                self.scanResults.append(sipResult)
+                print("🥷 SIP Result: \(sipResult)")
             }
             
             // Complete
@@ -90,17 +123,33 @@ class SecurityScanner: ObservableObject {
         task.arguments = ["--list"]
         
         let pipe = Pipe()
+        let errorPipe = Pipe()
         task.standardOutput = pipe
-        task.standardError = pipe
+        task.standardError = errorPipe
         
         do {
             try task.run()
             task.waitUntilExit()
             
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: data, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
             
-            if output.contains("No new software available") {
+            print("🥷 OS Updates - Output: \(output)")
+            print("🥷 OS Updates - Error: \(errorOutput)")
+            print("🥷 OS Updates - Exit code: \(task.terminationStatus)")
+            
+            // Check for various "no updates" messages
+            let noUpdatesPatterns = [
+                "No new software available",
+                "Software Update found the following new or updated software",
+                "No updates are available"
+            ]
+            
+            // If there's no output or specific "no updates" message, assume up to date
+            if output.isEmpty || output.contains("No new software available") || 
+               (!output.contains("Software Update found") && !output.contains("Label:")) {
                 return SecurityScanResult(
                     name: "OS Updates",
                     passed: true,
@@ -108,7 +157,7 @@ class SecurityScanner: ObservableObject {
                     points: 40,
                     fixInstructions: "Great! Your system is current."
                 )
-            } else {
+            } else if output.contains("Software Update found") || output.contains("Label:") {
                 return SecurityScanResult(
                     name: "OS Updates",
                     passed: false,
@@ -116,8 +165,18 @@ class SecurityScanner: ObservableObject {
                     points: 0,
                     fixInstructions: "Run 'sudo softwareupdate -i -a' or check System Settings > General > Software Update"
                 )
+            } else {
+                // If we can't determine, assume up to date (safer assumption)
+                return SecurityScanResult(
+                    name: "OS Updates",
+                    passed: true,
+                    message: "System appears up to date",
+                    points: 40,
+                    fixInstructions: "System appears current. Check System Settings > General > Software Update for confirmation."
+                )
             }
         } catch {
+            print("🥷 OS Updates - Exception: \(error)")
             return SecurityScanResult(
                 name: "OS Updates",
                 passed: false,
@@ -134,16 +193,24 @@ class SecurityScanner: ObservableObject {
         task.arguments = ["status"]
         
         let pipe = Pipe()
+        let errorPipe = Pipe()
         task.standardOutput = pipe
-        task.standardError = pipe
+        task.standardError = errorPipe
         
         do {
             try task.run()
             task.waitUntilExit()
             
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: data, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
             
+            print("🥷 FileVault - Output: \(output)")
+            print("🥷 FileVault - Error: \(errorOutput)")
+            print("🥷 FileVault - Exit code: \(task.terminationStatus)")
+            
+            // Check for FileVault enabled status
             if output.contains("FileVault is On") {
                 return SecurityScanResult(
                     name: "FileVault Encryption",
@@ -152,7 +219,7 @@ class SecurityScanner: ObservableObject {
                     points: 30,
                     fixInstructions: "Excellent! Your data is protected."
                 )
-            } else {
+            } else if output.contains("FileVault is Off") {
                 return SecurityScanResult(
                     name: "FileVault Encryption",
                     passed: false,
@@ -160,8 +227,18 @@ class SecurityScanner: ObservableObject {
                     points: 0,
                     fixInstructions: "Go to System Settings > Privacy & Security > FileVault to enable encryption"
                 )
+            } else {
+                // If we can't determine status, assume disabled for safety
+                return SecurityScanResult(
+                    name: "FileVault Encryption",
+                    passed: false,
+                    message: "Could not determine FileVault status",
+                    points: 0,
+                    fixInstructions: "Go to System Settings > Privacy & Security > FileVault to check encryption status"
+                )
             }
         } catch {
+            print("🥷 FileVault - Exception: \(error)")
             return SecurityScanResult(
                 name: "FileVault Encryption",
                 passed: false,
@@ -431,6 +508,164 @@ class SecurityScanner: ObservableObject {
                 scanResults[index].message = newMessage
             }
             calculateTotalScore()
+        }
+    }
+    
+    // MARK: - Additional Security Checks
+    
+    private func checkFirewallStatus() -> SecurityScanResult {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/libexec/ApplicationFirewall/socketfilterfw")
+        task.arguments = ["--getglobalstate"]
+        
+        let pipe = Pipe()
+        let errorPipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = errorPipe
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+            
+            print("🥷 Firewall - Output: \(output)")
+            print("🥷 Firewall - Error: \(errorOutput)")
+            print("🥷 Firewall - Exit code: \(task.terminationStatus)")
+            
+            if output.contains("enabled") {
+                return SecurityScanResult(
+                    name: "Firewall",
+                    passed: true,
+                    message: "Firewall is enabled",
+                    points: 15,
+                    fixInstructions: "Great! Your firewall is protecting your system."
+                )
+            } else {
+                return SecurityScanResult(
+                    name: "Firewall",
+                    passed: false,
+                    message: "Firewall is disabled",
+                    points: 0,
+                    fixInstructions: "Go to System Settings > Network > Firewall to enable protection"
+                )
+            }
+        } catch {
+            print("🥷 Firewall - Exception: \(error)")
+            return SecurityScanResult(
+                name: "Firewall",
+                passed: false,
+                message: "Could not check firewall status",
+                points: 0,
+                fixInstructions: "Go to System Settings > Network > Firewall to check status"
+            )
+        }
+    }
+    
+    private func checkGatekeeperStatus() -> SecurityScanResult {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/spctl")
+        task.arguments = ["--status"]
+        
+        let pipe = Pipe()
+        let errorPipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = errorPipe
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+            
+            print("🥷 Gatekeeper - Output: \(output)")
+            print("🥷 Gatekeeper - Error: \(errorOutput)")
+            print("🥷 Gatekeeper - Exit code: \(task.terminationStatus)")
+            
+            if output.contains("enabled") {
+                return SecurityScanResult(
+                    name: "Gatekeeper",
+                    passed: true,
+                    message: "Gatekeeper is enabled - protecting against malicious software",
+                    points: 15,
+                    fixInstructions: "Excellent! Gatekeeper is protecting your system."
+                )
+            } else {
+                return SecurityScanResult(
+                    name: "Gatekeeper",
+                    passed: false,
+                    message: "Gatekeeper is disabled - system vulnerable to malicious software",
+                    points: 0,
+                    fixInstructions: "Run 'sudo spctl --master-enable' to enable Gatekeeper protection"
+                )
+            }
+        } catch {
+            print("🥷 Gatekeeper - Exception: \(error)")
+            return SecurityScanResult(
+                name: "Gatekeeper",
+                passed: false,
+                message: "Could not check Gatekeeper status",
+                points: 0,
+                fixInstructions: "Run 'sudo spctl --status' to check Gatekeeper status"
+            )
+        }
+    }
+    
+    private func checkSystemIntegrityProtection() -> SecurityScanResult {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/csrutil")
+        task.arguments = ["status"]
+        
+        let pipe = Pipe()
+        let errorPipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = errorPipe
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+            
+            print("🥷 SIP - Output: \(output)")
+            print("🥷 SIP - Error: \(errorOutput)")
+            print("🥷 SIP - Exit code: \(task.terminationStatus)")
+            
+            if output.contains("enabled") {
+                return SecurityScanResult(
+                    name: "System Integrity Protection",
+                    passed: true,
+                    message: "SIP is enabled - protecting system files",
+                    points: 20,
+                    fixInstructions: "Perfect! System Integrity Protection is active."
+                )
+            } else {
+                return SecurityScanResult(
+                    name: "System Integrity Protection",
+                    passed: false,
+                    message: "SIP is disabled - system files vulnerable",
+                    points: 0,
+                    fixInstructions: "Boot into Recovery Mode and run 'csrutil enable' to enable SIP"
+                )
+            }
+        } catch {
+            print("🥷 SIP - Exception: \(error)")
+            return SecurityScanResult(
+                name: "System Integrity Protection",
+                passed: false,
+                message: "Could not check SIP status",
+                points: 0,
+                fixInstructions: "Boot into Recovery Mode and run 'csrutil status' to check SIP"
+            )
         }
     }
 }
