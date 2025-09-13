@@ -16,7 +16,7 @@ struct QuizView: View {
     @State private var currentAnswer: Int?
     
     var body: some View {
-        NavigationView {
+        VStack(spacing: 0) {
             if showResults, let session = quizService.currentSession {
                 resultsView(session: session)
             } else if !quizService.currentQuiz.isEmpty {
@@ -25,228 +25,121 @@ struct QuizView: View {
                 quizSetupView
             }
         }
-        .navigationTitle("Security Quiz")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Quiz Setup View
     private var quizSetupView: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                headerView
-                difficultySelectionView
-                categorySelectionView
-                questionCountView
-                generateButtonView
-                examplesView
-            }
-            .padding()
+        VStack(spacing: 20) {
+            headerView
+            difficultySelectionView
+            categorySelectionView
+            generateButtonView
         }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var headerView: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Image(systemName: "brain.head.profile")
-                    .font(.title)
-                    .foregroundColor(.purple)
-                Text("Security Quiz")
-                    .font(.title)
-                    .fontWeight(.bold)
-            }
+        VStack(spacing: 12) {
+            Text("Security Quiz")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
             
-            Text("Test your macOS security knowledge with AI-generated questions")
+            Text("Test your macOS security knowledge")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
             
             if !GeminiConfig.shared.isConfigured {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    Text("API Key Required - Configure Gemini API to generate quizzes")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.orange.opacity(0.1))
-                )
+                Text("⚠️ API Key Required")
+                    .font(.caption)
+                    .foregroundColor(.orange)
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
     }
     
     private var difficultySelectionView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Difficulty Level")
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Difficulty")
                 .font(.headline)
                 .fontWeight(.semibold)
             
             Picker("Difficulty", selection: $selectedDifficulty) {
                 ForEach(QuizDifficulty.allCases, id: \.self) { difficulty in
-                    HStack {
-                        Text(difficulty.rawValue)
-                        Spacer()
-                        Text("\(difficulty.points) pts")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .tag(difficulty)
+                    Text(difficulty.rawValue).tag(difficulty)
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
+            .frame(maxWidth: 300)
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
     }
     
     private var categorySelectionView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Quiz Category")
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Category")
                 .font(.headline)
                 .fontWeight(.semibold)
             
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+            Picker("Category", selection: $selectedCategory) {
                 ForEach(QuizCategory.allCases, id: \.self) { category in
-                    Button(action: {
-                        selectedCategory = category
-                    }) {
-                        VStack(spacing: 8) {
-                            Image(systemName: category.icon)
-                                .font(.title2)
-                                .foregroundColor(selectedCategory == category ? .white : .primary)
-                            
-                            Text(category.rawValue)
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(selectedCategory == category ? .white : .primary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(selectedCategory == category ? Color.blue : Color(NSColor.controlBackgroundColor))
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    Text(category.rawValue).tag(category)
                 }
             }
+            .pickerStyle(MenuPickerStyle())
+            .frame(maxWidth: 300)
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
     }
     
-    private var questionCountView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Number of Questions")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            HStack {
-                Text("Questions:")
-                    .font(.subheadline)
-                Spacer()
-                Stepper(value: $numberOfQuestions, in: 3...10) {
-                    Text("\(numberOfQuestions)")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.blue)
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
-    }
     
     private var generateButtonView: some View {
-        VStack(spacing: 8) {
-            AnimatedQuizButton(
-                title: quizService.isLoading ? "Generating Quiz..." : "Generate Quiz",
-                icon: "sparkles",
-                color: quizService.isLoading ? Color.orange : Color.purple,
-                isEnabled: !quizService.isLoading && GeminiConfig.shared.isConfigured,
-                isLoading: quizService.isLoading,
-                action: generateQuiz
-            )
+        VStack(spacing: 12) {
+            Button(action: generateQuiz) {
+                HStack {
+                    if quizService.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "play.fill")
+                    }
+                    Text(quizService.isLoading ? "Generating..." : "Start Quiz")
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(quizService.isLoading ? Color.gray : Color.blue)
+                )
+            }
+            .disabled(quizService.isLoading || !GeminiConfig.shared.isConfigured)
             
             if !quizService.errorMessage.isEmpty {
                 Text("Error: \(quizService.errorMessage)")
                     .font(.caption)
                     .foregroundColor(.red)
-                    .padding(.top, 8)
-                    .transition(.opacity.combined(with: .scale))
             }
         }
     }
     
-    private var examplesView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Example Topics")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                exampleTopic("FileVault Encryption", "Learn about full-disk encryption")
-                exampleTopic("Firewall Configuration", "Understand network security")
-                exampleTopic("Privacy Settings", "Master macOS privacy controls")
-                exampleTopic("System Integrity Protection", "Explore SIP security features")
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
-    }
-    
-    private func exampleTopic(_ title: String, _ description: String) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text(description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            Spacer()
-        }
-        .padding(.vertical, 4)
-    }
     
     // MARK: - Quiz Game View
     private var quizGameView: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 20) {
             progressHeaderView
-            
-            ScrollView {
-                VStack(spacing: 20) {
-                    questionView
-                    optionsView
-                    navigationView
-                }
-                .padding()
-            }
+            questionView
+            optionsView
+            navigationView
         }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var progressHeaderView: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             HStack {
                 Text("Question \(currentQuestionIndex + 1) of \(quizService.currentQuiz.count)")
                     .font(.headline)
@@ -259,46 +152,20 @@ struct QuizView: View {
                     .fontWeight(.semibold)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.blue.opacity(0.2))
-                    )
+                    .background(Color.blue.opacity(0.2))
                     .foregroundColor(.blue)
+                    .cornerRadius(4)
             }
             
-            AnimatedProgressBar(
-                progress: Double(currentQuestionIndex) / Double(quizService.currentQuiz.count),
-                color: .blue,
-                height: 8
-            )
+            ProgressView(value: Double(currentQuestionIndex + 1), total: Double(quizService.currentQuiz.count))
+                .progressViewStyle(LinearProgressViewStyle())
         }
-        .padding()
-        .background(Color(NSColor.controlBackgroundColor))
     }
     
     private var questionView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: quizService.currentQuiz[currentQuestionIndex].category.icon)
-                    .font(.title2)
-                    .foregroundColor(.blue)
-                
-                VStack(alignment: .leading) {
-                    Text(quizService.currentQuiz[currentQuestionIndex].category.rawValue)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(quizService.currentQuiz[currentQuestionIndex].points) points")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.blue)
-                }
-                
-                Spacer()
-            }
-            
+        VStack(alignment: .leading, spacing: 12) {
             Text(quizService.currentQuiz[currentQuestionIndex].question)
-                .font(.title3)
+                .font(.title2)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.leading)
             
@@ -306,33 +173,47 @@ struct QuizView: View {
                 explanationView
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
     }
     
     private var optionsView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             ForEach(Array(quizService.currentQuiz[currentQuestionIndex].options.enumerated()), id: \.offset) { index, option in
-                optionButton(index: index, option: option)
+                simpleOptionButton(index: index, option: option)
             }
         }
     }
     
-    private func optionButton(index: Int, option: String) -> some View {
-        AnimatedOptionButton(
-            option: option,
-            index: index,
-            isSelected: selectedAnswers.indices.contains(currentQuestionIndex) && selectedAnswers[currentQuestionIndex] == index,
-            isCorrect: showExplanation && index == quizService.currentQuiz[currentQuestionIndex].correctAnswer,
-            isWrong: showExplanation && selectedAnswers.indices.contains(currentQuestionIndex) && selectedAnswers[currentQuestionIndex] == index && index != quizService.currentQuiz[currentQuestionIndex].correctAnswer,
-            showResult: showExplanation,
-            action: {
-                selectAnswer(index)
+    private func simpleOptionButton(index: Int, option: String) -> some View {
+        Button(action: {
+            selectAnswer(index)
+        }) {
+            HStack {
+                Text(String(UnicodeScalar(65 + index)!))
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .frame(width: 24, height: 24)
+                    .background(Circle().fill(buttonColor(for: index)))
+                
+                Text(option)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
             }
-        )
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(backgroundColor(for: index))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(borderColor(for: index), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+        .disabled(showExplanation)
     }
     
     private var explanationView: some View {
@@ -358,25 +239,24 @@ struct QuizView: View {
     
     private var navigationView: some View {
         HStack {
-            Button("Previous") {
-                previousQuestion()
+            if currentQuestionIndex > 0 {
+                Button("Previous") {
+                    previousQuestion()
+                }
             }
-            .disabled(currentQuestionIndex == 0)
             
             Spacer()
             
             if currentQuestionIndex == quizService.currentQuiz.count - 1 {
-                Button("Finish Quiz") {
+                Button("Finish") {
                     finishQuiz()
                 }
                 .fontWeight(.semibold)
                 .foregroundColor(.white)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.green)
-                )
+                .padding(.horizontal, 24)
+                .padding(.vertical, 8)
+                .background(Color.green)
+                .cornerRadius(6)
             } else {
                 Button("Next") {
                     nextQuestion()
@@ -384,199 +264,50 @@ struct QuizView: View {
                 .disabled(!hasAnsweredCurrentQuestion())
             }
         }
-        .padding(.horizontal)
     }
     
     // MARK: - Results View
     private func resultsView(session: QuizSession) -> some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                resultsHeaderView(session: session)
-                scoreBreakdownView(session: session)
-                questionsReviewView(session: session)
-                actionButtonsView
-            }
-            .padding()
+        VStack(spacing: 20) {
+            resultsHeaderView(session: session)
+            actionButtonsView
         }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private func resultsHeaderView(session: QuizSession) -> some View {
-        ZStack {
-            VStack(spacing: 16) {
-                Text(session.grade.emoji)
-                    .font(.system(size: 60))
-                    .scaleEffect(1.2)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: showResults)
-                
-                Text(session.grade.rawValue)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(session.grade.color))
-                
-                Text(session.grade.message)
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
-                
-                VStack(spacing: 8) {
-                    Text("\(session.score)/\(session.totalPoints) points")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Text("\(session.percentage, specifier: "%.1f")%")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                    
-                    Text("Time: \(formatTime(session.timeSpent))")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(NSColor.controlBackgroundColor))
-            )
+        VStack(spacing: 16) {
+            Text(session.grade.emoji)
+                .font(.system(size: 60))
             
-            // Celebration effect for excellent scores
-            if session.grade == .excellent {
-                QuizAnimations.celebrationEffect()
-                    .opacity(0.8)
-            }
+            Text(session.grade.rawValue)
+                .font(.title)
+                .fontWeight(.bold)
+            
+            Text("\(session.percentage, specifier: "%.1f")%")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.blue)
+            
+            Text("\(session.score)/\(session.totalPoints) points")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
         }
     }
     
-    private func scoreBreakdownView(session: QuizSession) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Score Breakdown")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            ForEach(Array(session.questions.enumerated()), id: \.offset) { index, question in
-                let isCorrect = session.answers.indices.contains(index) && 
-                               session.answers[index] == question.correctAnswer
-                
-                HStack {
-                    Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundColor(isCorrect ? .green : .red)
-                    
-                    Text("Question \(index + 1)")
-                        .font(.subheadline)
-                    
-                    Spacer()
-                    
-                    Text("\(isCorrect ? question.points : 0)/\(question.points) pts")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.vertical, 4)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
-    }
-    
-    private func questionsReviewView(session: QuizSession) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Question Review")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            ForEach(Array(session.questions.enumerated()), id: \.offset) { index, question in
-                questionReviewRow(question: question, index: index, session: session)
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
-    }
-    
-    private func questionReviewRow(question: QuizQuestion, index: Int, session: QuizSession) -> some View {
-        let isCorrect = session.answers.indices.contains(index) && 
-                       session.answers[index] == question.correctAnswer
-        let userAnswer = session.answers.indices.contains(index) ? session.answers[index] : nil
-        
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Q\(index + 1)")
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(width: 20, height: 20)
-                    .background(
-                        Circle()
-                            .fill(isCorrect ? Color.green : Color.red)
-                    )
-                
-                Text(question.question)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-            }
-            
-            if let userAnswer = userAnswer {
-                HStack {
-                    Text("Your answer:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(question.options[userAnswer])
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(isCorrect ? .green : .red)
-                }
-            }
-            
-            if !isCorrect {
-                HStack {
-                    Text("Correct answer:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(question.options[question.correctAnswer])
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.green)
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.black.opacity(0.05))
-        )
-    }
     
     private var actionButtonsView: some View {
-        VStack(spacing: 12) {
-            Button("Take Another Quiz") {
-                resetQuiz()
-            }
-            .fontWeight(.semibold)
-            .foregroundColor(.white)
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.purple)
-            )
-            
-            Button("Share Results") {
-                // TODO: Implement sharing
-            }
-            .fontWeight(.semibold)
-            .foregroundColor(.blue)
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.blue, lineWidth: 2)
-            )
+        Button("Take Another Quiz") {
+            resetQuiz()
         }
+        .fontWeight(.semibold)
+        .foregroundColor(.white)
+        .padding(.horizontal, 32)
+        .padding(.vertical, 12)
+        .background(Color.blue)
+        .cornerRadius(8)
     }
     
     // MARK: - Helper Methods
@@ -666,61 +397,57 @@ struct QuizView: View {
                selectedAnswers[currentQuestionIndex] != nil
     }
     
-    private func optionColor(for index: Int) -> Color {
-        if !showExplanation {
-            return selectedAnswers.indices.contains(currentQuestionIndex) && 
-                   selectedAnswers[currentQuestionIndex] == index ? .blue : .gray
-        } else {
-            let question = quizService.currentQuiz[currentQuestionIndex]
-            if index == question.correctAnswer {
-                return .green
-            } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
-                      selectedAnswers[currentQuestionIndex] == index {
-                return .red
-            } else {
-                return .gray
-            }
-        }
-    }
-    
-    private func optionBackgroundColor(for index: Int) -> Color {
-        if !showExplanation {
-            return selectedAnswers.indices.contains(currentQuestionIndex) && 
-                   selectedAnswers[currentQuestionIndex] == index ? Color.blue.opacity(0.1) : Color.clear
-        } else {
-            let question = quizService.currentQuiz[currentQuestionIndex]
-            if index == question.correctAnswer {
-                return Color.green.opacity(0.1)
-            } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
-                      selectedAnswers[currentQuestionIndex] == index {
-                return Color.red.opacity(0.1)
-            } else {
-                return Color.clear
-            }
-        }
-    }
-    
-    private func optionBorderColor(for index: Int) -> Color {
-        if !showExplanation {
-            return selectedAnswers.indices.contains(currentQuestionIndex) && 
-                   selectedAnswers[currentQuestionIndex] == index ? .blue : .clear
-        } else {
-            let question = quizService.currentQuiz[currentQuestionIndex]
-            if index == question.correctAnswer {
-                return .green
-            } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
-                      selectedAnswers[currentQuestionIndex] == index {
-                return .red
-            } else {
-                return .clear
-            }
-        }
-    }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
         let minutes = Int(timeInterval) / 60
         let seconds = Int(timeInterval) % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+    
+    // MARK: - Helper Functions for Simple UI
+    private func buttonColor(for index: Int) -> Color {
+        if showExplanation {
+            if index == quizService.currentQuiz[currentQuestionIndex].correctAnswer {
+                return .green
+            } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
+                      selectedAnswers[currentQuestionIndex] == index {
+                return .red
+            }
+        } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
+                  selectedAnswers[currentQuestionIndex] == index {
+            return .blue
+        }
+        return .gray
+    }
+    
+    private func backgroundColor(for index: Int) -> Color {
+        if showExplanation {
+            if index == quizService.currentQuiz[currentQuestionIndex].correctAnswer {
+                return Color.green.opacity(0.1)
+            } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
+                      selectedAnswers[currentQuestionIndex] == index {
+                return Color.red.opacity(0.1)
+            }
+        } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
+                  selectedAnswers[currentQuestionIndex] == index {
+            return Color.blue.opacity(0.1)
+        }
+        return Color.clear
+    }
+    
+    private func borderColor(for index: Int) -> Color {
+        if showExplanation {
+            if index == quizService.currentQuiz[currentQuestionIndex].correctAnswer {
+                return .green
+            } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
+                      selectedAnswers[currentQuestionIndex] == index {
+                return .red
+            }
+        } else if selectedAnswers.indices.contains(currentQuestionIndex) && 
+                  selectedAnswers[currentQuestionIndex] == index {
+            return .blue
+        }
+        return Color.clear
     }
 }
 

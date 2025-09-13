@@ -56,7 +56,7 @@ class GeminiAPIService: ObservableObject {
     @Published var errorMessage: String = ""
     
     private let apiKey: String
-    private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+    private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
     
     init(apiKey: String) {
         self.apiKey = apiKey
@@ -64,6 +64,10 @@ class GeminiAPIService: ObservableObject {
     
     // MARK: - Public Methods
     func generateText(prompt: String, temperature: Double = 0.7, maxTokens: Int = 1000) async {
+        print("🚀 Starting Gemini API request...")
+        print("🔑 API Key configured: \(apiKey.prefix(10))...")
+        print("📝 Prompt length: \(prompt.count) characters")
+        
         await MainActor.run {
             isLoading = true
             errorMessage = ""
@@ -75,11 +79,13 @@ class GeminiAPIService: ObservableObject {
             await MainActor.run {
                 isLoading = false
                 lastResponse = response
+                print("✅ API request successful, response length: \(response.count)")
             }
         } catch {
             await MainActor.run {
                 isLoading = false
                 errorMessage = error.localizedDescription
+                print("❌ API request failed: \(error.localizedDescription)")
             }
         }
     }

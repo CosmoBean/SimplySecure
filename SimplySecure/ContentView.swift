@@ -17,6 +17,7 @@ struct ContentView: View {
         case terminal = "Terminal Test"
         case gemini = "AI Assistant"
         case quiz = "Security Quiz"
+        case tasks = "Security Tasks"
     }
     
     var body: some View {
@@ -135,6 +136,8 @@ struct ContentView: View {
                 GeminiTestView()
             case .quiz:
                 QuizView(gameModel: gameModel)
+            case .tasks:
+                SecurityTasksView(gameModel: gameModel)
             }
         }
         .frame(minWidth: 600, minHeight: 500)
@@ -169,6 +172,7 @@ struct ContentView: View {
         case .terminal: return "terminal.fill"
         case .gemini: return "brain.head.profile"
         case .quiz: return "questionmark.circle.fill"
+        case .tasks: return "list.bullet.clipboard.fill"
         }
     }
     
@@ -351,6 +355,16 @@ struct DashboardView: View {
                         .foregroundColor(.white)
                         .cornerRadius(3)
                     }
+                    
+                    Button("Test Task Execution") {
+                        NSLog("🎮 Demo: Test Task Execution button clicked")
+                        // This will be handled by the Security Tasks tab
+                    }
+                    .font(.caption2)
+                    .padding(2)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(3)
                 }
             }
             

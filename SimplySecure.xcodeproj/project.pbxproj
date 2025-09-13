@@ -28,6 +28,9 @@
 		AAA1234567890ABCDEF1234567 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB1234567890ABCDEF1234567 /* VideoPlayerView.swift */; };
 		EEE1234567890ABCDEF1234567 /* VideoScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF1234567890ABCDEF1234567 /* VideoScreen.swift */; };
 		CCC1234567890ABCDEF1234567 /* intro.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = DDD1234567890ABCDEF1234567 /* intro.mp4 */; };
+		GGG1234567890ABCDEF1234567 /* SecurityTaskModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = HHH1234567890ABCDEF1234567 /* SecurityTaskModels.swift */; };
+		III1234567890ABCDEF1234567 /* SecurityTasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJJ1234567890ABCDEF1234567 /* SecurityTasksView.swift */; };
+		KKK1234567890ABCDEF1234567 /* TaskExecutionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLL1234567890ABCDEF1234567 /* TaskExecutionService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +55,9 @@
 		BBB1234567890ABCDEF1234567 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		FFF1234567890ABCDEF1234567 /* VideoScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoScreen.swift; sourceTree = "<group>"; };
 		DDD1234567890ABCDEF1234567 /* intro.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = intro.mp4; sourceTree = "<group>"; };
+		HHH1234567890ABCDEF1234567 /* SecurityTaskModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityTaskModels.swift; sourceTree = "<group>"; };
+		JJJ1234567890ABCDEF1234567 /* SecurityTasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityTasksView.swift; sourceTree = "<group>"; };
+		LLL1234567890ABCDEF1234567 /* TaskExecutionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskExecutionService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +102,9 @@
 				BBB1234567890ABCDEF1234567 /* VideoPlayerView.swift */,
 				FFF1234567890ABCDEF1234567 /* VideoScreen.swift */,
 				DDD1234567890ABCDEF1234567 /* intro.mp4 */,
+				HHH1234567890ABCDEF1234567 /* SecurityTaskModels.swift */,
+				JJJ1234567890ABCDEF1234567 /* SecurityTasksView.swift */,
+				LLL1234567890ABCDEF1234567 /* TaskExecutionService.swift */,
 				J1234567890ABCDEF1234567 /* Assets.xcassets */,
 				L1234567890ABCDEF1234567 /* Info.plist */,
 			);
@@ -199,6 +208,9 @@
 				YY1234567890ABCDEF1234567 /* LoginView.swift in Sources */,
 				AAA1234567890ABCDEF1234567 /* VideoPlayerView.swift in Sources */,
 				EEE1234567890ABCDEF1234567 /* VideoScreen.swift in Sources */,
+				GGG1234567890ABCDEF1234567 /* SecurityTaskModels.swift in Sources */,
+				III1234567890ABCDEF1234567 /* SecurityTasksView.swift in Sources */,
+				KKK1234567890ABCDEF1234567 /* TaskExecutionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

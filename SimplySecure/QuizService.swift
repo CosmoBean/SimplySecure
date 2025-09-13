@@ -71,6 +71,7 @@ class QuizService: ObservableObject {
     
     init(apiKey: String) {
         self.geminiService = GeminiAPIService(apiKey: apiKey)
+        print("🔧 QuizService initialized with API key: \(apiKey.prefix(10))...")
     }
     
     // MARK: - Public Methods
@@ -169,34 +170,52 @@ class QuizService: ObservableObject {
     private func generateQuizWithAI(prompt: String) async throws -> [QuizQuestion] {
         await geminiService.generateText(prompt: prompt, temperature: 0.3, maxTokens: 2000)
         
+        // Check for API errors first
+        if !geminiService.errorMessage.isEmpty {
+            print("❌ Gemini API Error: \(geminiService.errorMessage)")
+            throw QuizError.parsingError("API Error: \(geminiService.errorMessage)")
+        }
+        
         guard !geminiService.lastResponse.isEmpty else {
+            print("❌ No response from Gemini API")
             throw QuizError.noResponse
         }
         
+        print("✅ Received response from Gemini API: \(geminiService.lastResponse.prefix(100))...")
+        
         // Try to parse the JSON response
         let jsonString = extractJSONFromResponse(geminiService.lastResponse)
+        print("📄 Extracted JSON: \(jsonString.prefix(200))...")
         
         guard let jsonData = jsonString.data(using: .utf8) else {
+            print("❌ Failed to convert JSON string to data")
             throw QuizError.invalidJSON
         }
         
-        let response = try JSONDecoder().decode(QuizGenerationResponse.self, from: jsonData)
-        
-        return response.questions.compactMap { generatedQuestion in
-            guard let difficulty = QuizDifficulty(rawValue: generatedQuestion.difficulty),
-                  let category = QuizCategory(rawValue: generatedQuestion.category) else {
-                return nil
+        do {
+            let response = try JSONDecoder().decode(QuizGenerationResponse.self, from: jsonData)
+            print("✅ Successfully parsed \(response.questions.count) questions")
+            return response.questions.compactMap { generatedQuestion in
+                guard let difficulty = QuizDifficulty(rawValue: generatedQuestion.difficulty),
+                      let category = QuizCategory(rawValue: generatedQuestion.category) else {
+                    print("❌ Invalid difficulty or category: \(generatedQuestion.difficulty), \(generatedQuestion.category)")
+                    return nil
+                }
+                
+                return QuizQuestion(
+                    question: generatedQuestion.question,
+                    options: generatedQuestion.options,
+                    correctAnswer: generatedQuestion.correctAnswer,
+                    explanation: generatedQuestion.explanation,
+                    difficulty: difficulty,
+                    category: category,
+                    points: generatedQuestion.points
+                )
             }
-            
-            return QuizQuestion(
-                question: generatedQuestion.question,
-                options: generatedQuestion.options,
-                correctAnswer: generatedQuestion.correctAnswer,
-                explanation: generatedQuestion.explanation,
-                difficulty: difficulty,
-                category: category,
-                points: generatedQuestion.points
-            )
+        } catch {
+            print("❌ JSON parsing error: \(error)")
+            print("❌ Raw JSON: \(jsonString)")
+            throw QuizError.parsingError("Failed to parse quiz response: \(error.localizedDescription)")
         }
     }
     
