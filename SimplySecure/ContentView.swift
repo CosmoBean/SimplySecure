@@ -4,6 +4,7 @@ import SwiftData
 struct ContentView: View {
     @StateObject private var securityScanner = SecurityScanner()
     @StateObject private var gameModel = NinjaGameModel()
+    @StateObject private var permissionService = AppPermissionService()
     @State private var selectedTab: Tab = .dashboard
     @State private var testCounter = 0
     @Environment(\.modelContext) private var modelContext
@@ -12,16 +13,22 @@ struct ContentView: View {
         case dashboard = "Dashboard"
         case account = "Account"
         case reports = "Reports"
+        case permissions = "App Permissions"
         case terminal = "Terminal Test"
         case gemini = "AI Assistant"
         case quiz = "Security Quiz"
     }
     
     var body: some View {
-        NavigationSplitView {
-            sidebarView
-        } detail: {
-            mainContentView
+        ZStack {
+            NavigationSplitView {
+                sidebarView
+            } detail: {
+                mainContentView
+            }
+            
+            // Permission Overlay
+            PermissionOverlayView(permissionService: permissionService)
         }
     }
     
@@ -120,6 +127,8 @@ struct ContentView: View {
                 AccountView(gameModel: gameModel)
             case .reports:
                 ReportsView(securityScanner: securityScanner)
+            case .permissions:
+                AppPermissionsView(permissionService: permissionService)
             case .terminal:
                 TerminalTestView()
             case .gemini:
@@ -139,6 +148,15 @@ struct ContentView: View {
             securityScanner.gameModel = gameModel
             NSLog("📱 ContentView: SecurityScanner gameModel after: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
             NSLog("📱 ContentView: GameModel currentXP: \(gameModel.currentXP)")
+            
+            // Start app installation monitoring
+            permissionService.startMonitoring()
+            NSLog("📱 ContentView: Started app installation monitoring")
+        }
+        .onDisappear {
+            // Stop monitoring when view disappears
+            permissionService.stopMonitoring()
+            NSLog("📱 ContentView: Stopped app installation monitoring")
         }
     }
     
@@ -147,6 +165,7 @@ struct ContentView: View {
         case .dashboard: return "house.fill"
         case .account: return "person.circle.fill"
         case .reports: return "chart.bar.fill"
+        case .permissions: return "shield.lefthalf.filled"
         case .terminal: return "terminal.fill"
         case .gemini: return "brain.head.profile"
         case .quiz: return "questionmark.circle.fill"

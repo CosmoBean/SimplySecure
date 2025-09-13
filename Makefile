@@ -3,7 +3,7 @@ build:
 run: kill build
 	open /Users/sridatta.bandreddi/Library/Developer/Xcode/DerivedData/SimplySecure-fuklfyarwyekmvdxuwtmjiqveytk/Build/Products/Debug/SimplySecure.app
 log:
-	log stream --predicate 'process == "SimplySecure"' --level debug | grep "🥷"
+	log stream --predicate 'process == "SimplySecure"' --level debug
 kill:
 	@echo "Killing SimplySecure app if running..."
 	@pkill -x SimplySecure || true

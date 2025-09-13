@@ -18,6 +18,12 @@
 		GG1234567890ABCDEF1234567 /* QuizService.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH1234567890ABCDEF1234567 /* QuizService.swift */; };
 		II1234567890ABCDEF1234567 /* QuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJ1234567890ABCDEF1234567 /* QuizView.swift */; };
 		KK1234567890ABCDEF1234567 /* QuizAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL1234567890ABCDEF1234567 /* QuizAnimations.swift */; };
+		MM1234567890ABCDEF1234567 /* AppPermissionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = NN1234567890ABCDEF1234567 /* AppPermissionModels.swift */; };
+		OO1234567890ABCDEF1234567 /* AppPermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PP1234567890ABCDEF1234567 /* AppPermissionService.swift */; };
+		QQ1234567890ABCDEF1234567 /* PermissionOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RR1234567890ABCDEF1234567 /* PermissionOverlayView.swift */; };
+		SS1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = TT1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift */; };
+		UU1234567890ABCDEF1234567 /* AppPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VV1234567890ABCDEF1234567 /* AppPermissionsView.swift */; };
+		WW1234567890ABCDEF1234567 /* PerplexityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = XX1234567890ABCDEF1234567 /* PerplexityService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +38,12 @@
 		HH1234567890ABCDEF1234567 /* QuizService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizService.swift; sourceTree = "<group>"; };
 		JJ1234567890ABCDEF1234567 /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizView.swift; sourceTree = "<group>"; };
 		LL1234567890ABCDEF1234567 /* QuizAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizAnimations.swift; sourceTree = "<group>"; };
+		NN1234567890ABCDEF1234567 /* AppPermissionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionModels.swift; sourceTree = "<group>"; };
+		PP1234567890ABCDEF1234567 /* AppPermissionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionService.swift; sourceTree = "<group>"; };
+		RR1234567890ABCDEF1234567 /* PermissionOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionOverlayView.swift; sourceTree = "<group>"; };
+		TT1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyAnalyzer.swift; sourceTree = "<group>"; };
+		VV1234567890ABCDEF1234567 /* AppPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionsView.swift; sourceTree = "<group>"; };
+		XX1234567890ABCDEF1234567 /* PerplexityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerplexityService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +78,12 @@
 				HH1234567890ABCDEF1234567 /* QuizService.swift */,
 				JJ1234567890ABCDEF1234567 /* QuizView.swift */,
 				LL1234567890ABCDEF1234567 /* QuizAnimations.swift */,
+				NN1234567890ABCDEF1234567 /* AppPermissionModels.swift */,
+				PP1234567890ABCDEF1234567 /* AppPermissionService.swift */,
+				RR1234567890ABCDEF1234567 /* PermissionOverlayView.swift */,
+				TT1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift */,
+				VV1234567890ABCDEF1234567 /* AppPermissionsView.swift */,
+				XX1234567890ABCDEF1234567 /* PerplexityService.swift */,
 				J1234567890ABCDEF1234567 /* Assets.xcassets */,
 				L1234567890ABCDEF1234567 /* Info.plist */,
 			);
@@ -159,6 +177,12 @@
 				GG1234567890ABCDEF1234567 /* QuizService.swift in Sources */,
 				II1234567890ABCDEF1234567 /* QuizView.swift in Sources */,
 				KK1234567890ABCDEF1234567 /* QuizAnimations.swift in Sources */,
+				MM1234567890ABCDEF1234567 /* AppPermissionModels.swift in Sources */,
+				OO1234567890ABCDEF1234567 /* AppPermissionService.swift in Sources */,
+				QQ1234567890ABCDEF1234567 /* PermissionOverlayView.swift in Sources */,
+				SS1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift in Sources */,
+				UU1234567890ABCDEF1234567 /* AppPermissionsView.swift in Sources */,
+				WW1234567890ABCDEF1234567 /* PerplexityService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
