@@ -24,6 +24,10 @@
 		SS1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = TT1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift */; };
 		UU1234567890ABCDEF1234567 /* AppPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VV1234567890ABCDEF1234567 /* AppPermissionsView.swift */; };
 		WW1234567890ABCDEF1234567 /* PerplexityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = XX1234567890ABCDEF1234567 /* PerplexityService.swift */; };
+		YY1234567890ABCDEF1234567 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ZZ1234567890ABCDEF1234567 /* LoginView.swift */; };
+		AAA1234567890ABCDEF1234567 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB1234567890ABCDEF1234567 /* VideoPlayerView.swift */; };
+		EEE1234567890ABCDEF1234567 /* VideoScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF1234567890ABCDEF1234567 /* VideoScreen.swift */; };
+		CCC1234567890ABCDEF1234567 /* intro.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = DDD1234567890ABCDEF1234567 /* intro.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +48,10 @@
 		TT1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyAnalyzer.swift; sourceTree = "<group>"; };
 		VV1234567890ABCDEF1234567 /* AppPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionsView.swift; sourceTree = "<group>"; };
 		XX1234567890ABCDEF1234567 /* PerplexityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerplexityService.swift; sourceTree = "<group>"; };
+		ZZ1234567890ABCDEF1234567 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		BBB1234567890ABCDEF1234567 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		FFF1234567890ABCDEF1234567 /* VideoScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoScreen.swift; sourceTree = "<group>"; };
+		DDD1234567890ABCDEF1234567 /* intro.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = intro.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +92,10 @@
 				TT1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift */,
 				VV1234567890ABCDEF1234567 /* AppPermissionsView.swift */,
 				XX1234567890ABCDEF1234567 /* PerplexityService.swift */,
+				ZZ1234567890ABCDEF1234567 /* LoginView.swift */,
+				BBB1234567890ABCDEF1234567 /* VideoPlayerView.swift */,
+				FFF1234567890ABCDEF1234567 /* VideoScreen.swift */,
+				DDD1234567890ABCDEF1234567 /* intro.mp4 */,
 				J1234567890ABCDEF1234567 /* Assets.xcassets */,
 				L1234567890ABCDEF1234567 /* Info.plist */,
 			);
@@ -157,6 +169,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				I1234567890ABCDEF1234567 /* Assets.xcassets in Resources */,
+				CCC1234567890ABCDEF1234567 /* intro.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,6 +196,9 @@
 				SS1234567890ABCDEF1234567 /* PrivacyPolicyAnalyzer.swift in Sources */,
 				UU1234567890ABCDEF1234567 /* AppPermissionsView.swift in Sources */,
 				WW1234567890ABCDEF1234567 /* PerplexityService.swift in Sources */,
+				YY1234567890ABCDEF1234567 /* LoginView.swift in Sources */,
+				AAA1234567890ABCDEF1234567 /* VideoPlayerView.swift in Sources */,
+				EEE1234567890ABCDEF1234567 /* VideoScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

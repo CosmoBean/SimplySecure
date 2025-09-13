@@ -937,7 +937,8 @@ struct ReportsView: View {
             
             let failedResults = securityScanner.scanResults.filter { !$0.passed }
             
-            if failedResults.isEmpty {
+            // Only show success message if tests have been run (scanResults is not empty)
+            if failedResults.isEmpty && !securityScanner.scanResults.isEmpty {
                 Text("🎉 Excellent! All security checks have passed. Your system is secure!")
                     .font(.subheadline)
                     .foregroundColor(.green)
@@ -946,7 +947,7 @@ struct ReportsView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color.green.opacity(0.1))
                     )
-            } else {
+            } else if !failedResults.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Priority Actions:")
                         .font(.subheadline)
@@ -971,6 +972,16 @@ struct ReportsView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.red.opacity(0.1))
                 )
+            } else {
+                // No tests have been run yet
+                Text("Run a security scan to see recommendations and check your system's security status.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.1))
+                    )
             }
         }
         .padding()
