@@ -57,6 +57,8 @@ echo "• Ninja-themed gamification with XP and levels"
 echo "• Real-time security score (0-100)"
 echo "• Actionable fix instructions"
 echo "• Dark/light mode support"
+echo "• Phishing call simulation with Retell AI"
+echo "• AI-powered security insights with Gemini"
 echo ""
 echo "🎯 Perfect for HackCMU 2025 demo!"
 
@@ -73,5 +75,10 @@ else
     echo "⚠️  Project file not found. Make sure you're in the correct directory."
 fi
 
+echo ""
+echo "🔧 Optional API Setup:"
+echo "• Run './setup_gemini.sh' to configure Gemini AI API"
+echo "• Run './setup_retell.sh' to configure Retell AI API for phishing simulation"
+echo "• Run './setup_perplexity.sh' to configure Perplexity API"
 echo ""
 echo "🥷 Ready to secure your Mac like a ninja!"

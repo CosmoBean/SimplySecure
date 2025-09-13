@@ -38,6 +38,7 @@ struct LoginView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .font(.system(.body, design: .default))
                         .disableAutocorrection(true)
+                        .frame(height: 50)
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
@@ -48,6 +49,7 @@ struct LoginView: View {
                     SecureField("Enter password", text: $password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .font(.system(.body, design: .default))
+                        .frame(height: 50)
                 }
                 
                 // Error Message

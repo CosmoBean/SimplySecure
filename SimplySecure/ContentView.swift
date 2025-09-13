@@ -18,6 +18,7 @@ struct ContentView: View {
         case gemini = "AI Assistant"
         case quiz = "Security Quiz"
         case tasks = "Security Tasks"
+        case phishing = "Phishing Sim"
     }
     
     var body: some View {
@@ -167,6 +168,8 @@ struct ContentView: View {
                 QuizView(gameModel: gameModel)
             case .tasks:
                 SecurityTasksView(gameModel: gameModel)
+            case .phishing:
+                PhishingSimulationView()
             }
         }
         .frame(minWidth: 600, minHeight: 500)
@@ -202,6 +205,7 @@ struct ContentView: View {
         case .gemini: return "brain.head.profile"
         case .quiz: return "questionmark.circle.fill"
         case .tasks: return "list.bullet.clipboard.fill"
+        case .phishing: return "phone.badge.plus"
         }
     }
     
@@ -216,7 +220,7 @@ struct ContentView: View {
     }
     
     private var bottomTabs: [Tab] {
-        [.account, .gemini]
+        [.account, .gemini, .phishing]
     }
     
     private var securityScoreColor: Color {
@@ -1665,6 +1669,327 @@ struct GeminiTestView: View {
                 temperature: temperature,
                 maxTokens: maxTokens
             )
+        }
+    }
+}
+
+// MARK: - Phishing Simulation View
+struct PhishingSimulationView: View {
+    @StateObject private var retellService = RetellAIService(apiKey: RetellConfig.shared.apiKey)
+    @State private var isSimulating = false
+    @State private var simulationStatus = ""
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Header
+                headerView
+                
+                // API Key Configuration
+                apiKeyView
+                
+                // Simulation Button
+                simulationButtonView
+                
+                // Status Display
+                statusView
+                
+                // Instructions
+                instructionsView
+            }
+            .padding()
+        }
+    }
+    
+    private var headerView: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "phone.badge.plus")
+                    .font(.title)
+                    .foregroundColor(.red)
+                Text("Phishing Call Simulation")
+                    .font(.title)
+                    .fontWeight(.bold)
+            }
+            
+            Text("Simulate phishing calls using Retell AI API for security awareness training")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var apiKeyView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("API Configuration")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            HStack {
+                Image(systemName: RetellConfig.shared.isConfigured ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                    .foregroundColor(RetellConfig.shared.isConfigured ? .green : .orange)
+                
+                Text(RetellConfig.shared.isConfigured ? "Retell AI API Key Configured" : "Retell AI API Key Required")
+                    .font(.subheadline)
+                    .foregroundColor(RetellConfig.shared.isConfigured ? .green : .orange)
+                
+                Spacer()
+            }
+            
+            if !RetellConfig.shared.isConfigured {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("To configure your Retell AI API key:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("1. Add RETELL_API_KEY=your_key_here to your .env file")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 8)
+                    
+                    Text("2. Get your API key from: https://retellai.com")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 8)
+                    
+                    Text("3. Restart the app to load the new configuration")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 8)
+                }
+                .padding(.top, 4)
+            } else {
+                Text("✅ API key loaded from .env file")
+                    .font(.caption)
+                    .foregroundColor(.green)
+                    .padding(.top, 4)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    
+    private var simulationButtonView: some View {
+        VStack(spacing: 12) {
+            // Test API Connectivity Button
+            Button(action: testAPIConnectivity) {
+                HStack {
+                    Image(systemName: "wifi")
+                    Text("Test API Connectivity")
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.blue)
+                )
+            }
+            .disabled(!RetellConfig.shared.isConfigured)
+            
+            // Start Simulation Button
+            Button(action: startPhishingSimulation) {
+                HStack {
+                    if isSimulating {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .foregroundColor(.white)
+                    } else {
+                        Image(systemName: "phone.badge.plus")
+                    }
+                    Text(isSimulating ? "Simulating..." : "Start Phishing Call Simulation")
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(isSimulating ? Color.orange : Color.red)
+                )
+            }
+            .disabled(isSimulating || !RetellConfig.shared.isConfigured)
+        }
+    }
+    
+    private var statusView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Simulation Status")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            if !simulationStatus.isEmpty {
+                ScrollView {
+                    Text(simulationStatus)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.black.opacity(0.05))
+                        )
+                }
+                .frame(minHeight: 100, maxHeight: 200)
+            } else if !retellService.errorMessage.isEmpty {
+                Text("Error: \(retellService.errorMessage)")
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.red.opacity(0.1))
+                    )
+            } else {
+                Text("No simulation run yet. Click 'Start Phishing Call Simulation' to begin.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            }
+            
+            // Gemini Analysis Section
+            if retellService.isAnalyzingTranscript || !retellService.phishingAnalysis.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("AI Analysis")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    if retellService.isAnalyzingTranscript {
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Analyzing transcript with Gemini AI...")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                    } else if !retellService.phishingAnalysis.isEmpty {
+                        ScrollView {
+                            Text(retellService.phishingAnalysis)
+                                .font(.body)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.green.opacity(0.1))
+                                )
+                        }
+                        .frame(minHeight: 120, maxHeight: 300)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var instructionsView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("How It Works")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                instructionStep("1. Create Call", "Initiates an outbound call using hardcoded phone numbers")
+                instructionStep("2. Wait for Completion", "Polls the API every 5 seconds for call completion")
+                instructionStep("3. Fetch Transcription", "Retrieves the full call transcript when available")
+                instructionStep("4. AI Analysis", "Gemini AI analyzes the transcript for phishing effectiveness")
+                instructionStep("5. Display Results", "Shows transcript and AI feedback in the interface")
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private func instructionStep(_ title: String, _ description: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .frame(width: 120, alignment: .leading)
+            
+            Text(description)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 2)
+    }
+    
+    private func testAPIConnectivity() {
+        NSLog("🔴 PHISHING SIMULATION: Testing API connectivity")
+        
+        simulationStatus = "Testing API connectivity...\n"
+        
+        Task {
+            let isConnected = await retellService.testAPIConnectivity()
+            
+            await MainActor.run {
+                if isConnected {
+                    simulationStatus += "✅ API connectivity test successful!\n"
+                    simulationStatus += "API key is valid and endpoint is accessible.\n"
+                } else {
+                    simulationStatus += "❌ API connectivity test failed!\n"
+                    simulationStatus += "Please check:\n"
+                    simulationStatus += "1. API key is correct\n"
+                    simulationStatus += "2. Internet connection\n"
+                    simulationStatus += "3. Retell AI service status\n"
+                }
+            }
+        }
+    }
+    
+    private func startPhishingSimulation() {
+        NSLog("🔴 PHISHING SIMULATION: User initiated phishing call simulation")
+        NSLog("🔴 PHISHING SIMULATION: Using hardcoded phone numbers")
+        
+        isSimulating = true
+        simulationStatus = "Starting phishing call simulation...\nUsing pre-configured phone numbers\n"
+        
+        Task {
+            await retellService.simulatePhishingCall()
+            
+            await MainActor.run {
+                isSimulating = false
+                
+                if let callId = retellService.lastCallId {
+                    simulationStatus += "\n✅ Call created successfully!\nCall ID: \(callId)\n"
+                    
+                    if let transcription = retellService.lastTranscription, !transcription.isEmpty {
+                        simulationStatus += "\n📝 Transcription received:\n\(transcription)\n"
+                        simulationStatus += "\n✅ Simulation completed successfully!"
+                    } else {
+                        simulationStatus += "\n⚠️ Call completed but transcription not available yet."
+                    }
+                } else {
+                    simulationStatus += "\n❌ Failed to create call."
+                }
+                
+                if !retellService.errorMessage.isEmpty {
+                    simulationStatus += "\nError: \(retellService.errorMessage)"
+                }
+            }
         }
     }
 }

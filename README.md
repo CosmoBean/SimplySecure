@@ -7,6 +7,7 @@ A ninja-themed macOS desktop application that performs security scans and gamifi
 - **Security Scanning**: Checks OS updates, FileVault encryption, and Safari security settings
 - **Gamification**: Earn XP and level up as a ninja while fixing security issues
 - **AI Assistant**: Google Gemini integration for AI-powered security insights
+- **Phishing Simulation**: Retell AI integration for phishing call awareness training
 - **Ninja Theme**: Dark/light mode support with ninja-themed UI
 - **Real-time Results**: Instant feedback on security status with actionable fixes
 
@@ -16,6 +17,7 @@ A ninja-themed macOS desktop application that performs security scans and gamifi
 - Xcode 14.0 or later
 - Admin privileges for some security checks
 - Google Gemini API key (optional, for AI features)
+- Retell AI API key (optional, for phishing simulation)
 
 ## Setup Instructions
 
@@ -29,10 +31,15 @@ A ninja-themed macOS desktop application that performs security scans and gamifi
    - Ensure "Hardened Runtime" is enabled in Build Settings
    - Add "Allow Execution of JIT-compiled Code" entitlement if needed
 
-3. **Configure Gemini API (Optional)**:
+3. **Configure APIs (Optional)**:
    ```bash
+   # Gemini AI for AI Assistant
    ./setup_gemini.sh
    export GEMINI_API_KEY='your_api_key_here'
+   
+   # Retell AI for Phishing Simulation
+   ./setup_retell.sh
+   export RETELL_API_KEY='your_api_key_here'
    ```
 
 4. **Build and Run**:
@@ -67,6 +74,34 @@ The app includes a Google Gemini-powered AI assistant that can:
 3. Navigate to the "AI Assistant" tab in the app
 4. Start asking security-related questions!
 
+## Phishing Call Simulation (Retell AI Integration)
+
+The app includes a phishing call simulation feature powered by Retell AI that can:
+- Create realistic outbound calls for security awareness training
+- Generate full call transcriptions with detailed analysis
+- Log all call data using NSLog for security analysis
+- Provide insights into call sentiment, topics, and key points
+
+### Getting Started with Phishing Simulation
+1. Get an API key from [Retell AI](https://retellai.com)
+2. Run the setup script: `./setup_retell.sh`
+3. Navigate to the "Phishing Sim" tab in the app
+4. Enter phone numbers in E.164 format (e.g., +1234567890)
+5. Click "Start Phishing Call Simulation" to begin
+
+### How It Works
+1. **Create Call**: Initiates an outbound call using Retell AI API
+2. **Wait for Completion**: Polls the API every 5 seconds for call completion
+3. **Fetch Transcription**: Retrieves the full call transcript when available
+4. **Log Results**: All transcription data is logged using NSLog for analysis
+
+The simulation provides comprehensive logging including:
+- Call ID and status
+- Full conversation transcript
+- Call summary and analysis
+- Sentiment analysis
+- Key topics and points discussed
+
 ## Gamification System
 
 ### Ninja Levels
@@ -89,11 +124,13 @@ SimplySecure/
 │   ├── SecurityScanner.swift      # Security scan logic
 │   ├── NinjaGameModel.swift       # Gamification system
 │   ├── GeminiAPIService.swift     # Google Gemini API integration
+│   ├── RetellAIService.swift      # Retell AI API integration
 │   ├── Assets.xcassets           # App icons and assets
 │   ├── Info.plist                # App configuration
 │   └── SimplySecure.entitlements  # App permissions
 ├── SimplySecure.xcodeproj        # Xcode project file
 ├── setup_gemini.sh              # Gemini API setup script
+├── setup_retell.sh              # Retell AI API setup script
 └── README.md                     # This file
 ```
 
@@ -105,6 +142,7 @@ SimplySecure/
 4. **Fix Issues** - Click "Fix" on failed missions for instructions
 5. **Earn XP** - Complete fixes to level up your ninja status
 6. **Ask AI Assistant** - Use the Gemini-powered AI for security insights
+7. **Simulate Phishing** - Test security awareness with realistic call simulations
 
 ## Technical Details
 
