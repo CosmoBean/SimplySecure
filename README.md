@@ -14,7 +14,7 @@ A ninja-themed macOS desktop application that performs security scans and gamifi
 
 ## Key Technologies
 
-- **Quiz built using Swift agents**: AI-powered dynamic quiz generation with SwiftAIAgents + Gemini
+- **Quiz built using agentic system**: AI-powered dynamic quiz generation with SwiftAIAgents + Gemini
 - **SwiftUI**: Modern declarative UI framework with animations and haptic feedback
 - **Privacy policy analysis using Perplexity deep research**: Advanced app privacy analysis and policy research
 
