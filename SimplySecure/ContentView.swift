@@ -37,9 +37,11 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             headerSection
             Divider()
-            navigationSection
+            mainNavigationSection
             Spacer()
             quickStatsSection
+            Divider()
+            bottomNavigationSection
         }
         .frame(minWidth: 200)
         .background(Color(NSColor.controlBackgroundColor))
@@ -57,9 +59,9 @@ struct ContentView: View {
         .padding()
     }
     
-    private var navigationSection: some View {
+    private var mainNavigationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(Tab.allCases, id: \.self) { tab in
+            ForEach(mainTabs, id: \.self) { tab in
                 Button(action: {
                     selectedTab = tab
                 }) {
@@ -119,6 +121,33 @@ struct ContentView: View {
         .padding(.bottom)
     }
     
+    private var bottomNavigationSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(bottomTabs, id: \.self) { tab in
+                Button(action: {
+                    selectedTab = tab
+                }) {
+                    HStack {
+                        Image(systemName: tabIcon(for: tab))
+                            .foregroundColor(selectedTab == tab ? .white : .primary)
+                        Text(tab.rawValue)
+                            .foregroundColor(selectedTab == tab ? .white : .primary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedTab == tab ? Color.red : Color.clear)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom)
+    }
+    
     private var mainContentView: some View {
         Group {
             switch selectedTab {
@@ -174,6 +203,20 @@ struct ContentView: View {
         case .quiz: return "questionmark.circle.fill"
         case .tasks: return "list.bullet.clipboard.fill"
         }
+    }
+    
+    private var visibleTabs: [Tab] {
+        Tab.allCases.filter { tab in
+            tab != .terminal && tab != .reports
+        }
+    }
+    
+    private var mainTabs: [Tab] {
+        [.dashboard, .tasks, .quiz, .permissions]
+    }
+    
+    private var bottomTabs: [Tab] {
+        [.account, .gemini]
     }
     
     private var securityScoreColor: Color {
