@@ -807,6 +807,7 @@ struct TerminalTestView: View {
         case uptime = "System Uptime"
         case diskUsage = "Disk Usage"
         case networkInfo = "Network Info"
+        case setDNS = "Set DNS (Cloudflare)"
         case custom = "Custom Command"
         
         var executablePath: String {
@@ -816,6 +817,7 @@ struct TerminalTestView: View {
             case .uptime: return "/usr/bin/uptime"
             case .diskUsage: return "/bin/df"
             case .networkInfo: return "/usr/sbin/networksetup"
+            case .setDNS: return "/usr/sbin/networksetup"
             case .custom: return "/bin/zsh"
             }
         }
@@ -827,6 +829,7 @@ struct TerminalTestView: View {
             case .uptime: return []
             case .diskUsage: return ["-h"]
             case .networkInfo: return ["-listallhardwareports"]
+            case .setDNS: return ["-setdnsservers", "Wi-Fi", "1.1.1.1", "1.0.0.1"]
             case .custom: return ["-c", ""]
             }
         }
@@ -1027,6 +1030,7 @@ struct TerminalTestView: View {
                 exampleRow("System Uptime", "Displays system uptime")
                 exampleRow("Disk Usage", "Shows disk space usage")
                 exampleRow("Network Info", "Lists network hardware ports")
+                exampleRow("Set DNS (Cloudflare)", "Sets DNS to 1.1.1.1 and 1.0.0.1 for better privacy")
             }
         }
         .padding()
