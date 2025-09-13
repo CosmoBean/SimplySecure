@@ -10,6 +10,7 @@ struct ContentView: View {
         case dashboard = "Dashboard"
         case account = "Account"
         case reports = "Reports"
+        case terminal = "Terminal Test"
     }
     
     var body: some View {
@@ -104,6 +105,8 @@ struct ContentView: View {
                     AccountView(gameModel: gameModel)
                 case .reports:
                     ReportsView(securityScanner: securityScanner)
+                case .terminal:
+                    TerminalTestView()
                 }
             }
             .frame(minWidth: 600, minHeight: 500)
@@ -115,6 +118,7 @@ struct ContentView: View {
         case .dashboard: return "house.fill"
         case .account: return "person.circle.fill"
         case .reports: return "chart.bar.fill"
+        case .terminal: return "terminal.fill"
         }
     }
     
@@ -785,6 +789,317 @@ struct ReportsView: View {
         case 80...100: return .green
         case 60..<80: return .orange
         default: return .red
+        }
+    }
+}
+
+// MARK: - Terminal Test View
+struct TerminalTestView: View {
+    @State private var commandOutput = ""
+    @State private var isRunning = false
+    @State private var selectedCommand: TerminalCommand = .say
+    @State private var customCommand = ""
+    @State private var customArguments = ""
+    
+    enum TerminalCommand: String, CaseIterable {
+        case say = "Say Hello"
+        case whoami = "Who Am I"
+        case uptime = "System Uptime"
+        case diskUsage = "Disk Usage"
+        case networkInfo = "Network Info"
+        case custom = "Custom Command"
+        
+        var executablePath: String {
+            switch self {
+            case .say: return "/usr/bin/say"
+            case .whoami: return "/usr/bin/whoami"
+            case .uptime: return "/usr/bin/uptime"
+            case .diskUsage: return "/bin/df"
+            case .networkInfo: return "/usr/sbin/networksetup"
+            case .custom: return "/bin/zsh"
+            }
+        }
+        
+        var arguments: [String] {
+            switch self {
+            case .say: return ["Hello from SimplySecure!"]
+            case .whoami: return []
+            case .uptime: return []
+            case .diskUsage: return ["-h"]
+            case .networkInfo: return ["-listallhardwareports"]
+            case .custom: return ["-c", ""]
+            }
+        }
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Header
+                headerView
+                
+                // Command Selection
+                commandSelectionView
+                
+                // Custom Command Input
+                if selectedCommand == .custom {
+                    customCommandView
+                }
+                
+                // Execute Button
+                executeButtonView
+                
+                // Output Display
+                outputView
+                
+                // Examples
+                examplesView
+            }
+            .padding()
+        }
+    }
+    
+    private var headerView: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "terminal.fill")
+                    .font(.title)
+                    .foregroundColor(.blue)
+                Text("Terminal Access Test")
+                    .font(.title)
+                    .fontWeight(.bold)
+            }
+            
+            Text("Test terminal command execution with proper permissions")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var commandSelectionView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Select Command")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            Picker("Command", selection: $selectedCommand) {
+                ForEach(TerminalCommand.allCases, id: \.self) { command in
+                    Text(command.rawValue).tag(command)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            
+            if selectedCommand != .custom {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Command Details:")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    
+                    HStack {
+                        Text("Path:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(selectedCommand.executablePath)
+                            .font(.system(.caption, design: .monospaced))
+                    }
+                    
+                    if !selectedCommand.arguments.isEmpty {
+                        HStack {
+                            Text("Args:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(selectedCommand.arguments.joined(separator: " "))
+                                .font(.system(.caption, design: .monospaced))
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(NSColor.controlBackgroundColor))
+                )
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var customCommandView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Custom Command")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Command:")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                
+                TextField("e.g., echo 'Hello World'", text: $customCommand)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .font(.system(.body, design: .monospaced))
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Arguments (optional):")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                
+                TextField("e.g., -l, --verbose", text: $customArguments)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .font(.system(.body, design: .monospaced))
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var executeButtonView: some View {
+        Button(action: executeCommand) {
+            HStack {
+                if isRunning {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                        .foregroundColor(.white)
+                } else {
+                    Image(systemName: "play.fill")
+                }
+                Text(isRunning ? "Running..." : "Execute Command")
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isRunning ? Color.orange : Color.blue)
+            )
+        }
+        .disabled(isRunning)
+    }
+    
+    private var outputView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Command Output")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            ScrollView {
+                Text(commandOutput.isEmpty ? "No output yet. Run a command to see results." : commandOutput)
+                    .font(.system(.body, design: .monospaced))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.black.opacity(0.05))
+                    )
+            }
+            .frame(minHeight: 200, maxHeight: 300)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var examplesView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Example Commands")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                exampleRow("Say Hello", "Uses /usr/bin/say to speak text")
+                exampleRow("Who Am I", "Shows current user with /usr/bin/whoami")
+                exampleRow("System Uptime", "Displays system uptime")
+                exampleRow("Disk Usage", "Shows disk space usage")
+                exampleRow("Network Info", "Lists network hardware ports")
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private func exampleRow(_ title: String, _ description: String) -> some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 4)
+    }
+    
+    private func executeCommand() {
+        isRunning = true
+        commandOutput = ""
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let executableURL = URL(fileURLWithPath: selectedCommand.executablePath)
+                var arguments = selectedCommand.arguments
+                
+                if selectedCommand == .custom {
+                    if !customArguments.isEmpty {
+                        arguments = ["-c", "\(customCommand) \(customArguments)"]
+                    } else {
+                        arguments = ["-c", customCommand]
+                    }
+                }
+                
+                let task = Process()
+                task.executableURL = executableURL
+                task.arguments = arguments
+                
+                let pipe = Pipe()
+                task.standardOutput = pipe
+                task.standardError = pipe
+                
+                try task.run()
+                task.waitUntilExit()
+                
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                let output = String(data: data, encoding: .utf8) ?? "No output"
+                
+                DispatchQueue.main.async {
+                    self.commandOutput = """
+                    Command: \(executableURL.path)
+                    Arguments: \(arguments.joined(separator: " "))
+                    Exit Code: \(task.terminationStatus)
+                    
+                    Output:
+                    \(output)
+                    """
+                    self.isRunning = false
+                }
+                
+            } catch {
+                DispatchQueue.main.async {
+                    self.commandOutput = "Error: \(error.localizedDescription)"
+                    self.isRunning = false
+                }
+            }
         }
     }
 }
