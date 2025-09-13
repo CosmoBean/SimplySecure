@@ -1,4 +1,5 @@
 # SimplySecure - macOS Security Scanner
+### - By Shadow Chickens!
 
 A ninja-themed macOS desktop application that performs security scans and gamifies the process of securing your MacBook.
 
@@ -10,6 +11,12 @@ A ninja-themed macOS desktop application that performs security scans and gamifi
 - **Phishing Simulation**: Retell AI integration for phishing call awareness training
 - **Ninja Theme**: Dark/light mode support with ninja-themed UI
 - **Real-time Results**: Instant feedback on security status with actionable fixes
+
+## Key Technologies
+
+- **Quiz built using Swift agents**: AI-powered dynamic quiz generation with SwiftAIAgents + Gemini
+- **SwiftUI**: Modern declarative UI framework with animations and haptic feedback
+- **Privacy policy analysis using Perplexity deep research**: Advanced app privacy analysis and policy research
 
 ## Requirements
 
@@ -190,4 +197,12 @@ For hackathon demos:
 
 ---
 
-**Built for HackCMU 2025** 🥷
+## Screenshots
+
+![4 Ninjas](images/4-ninjas.jpg)
+![4 Chickens](images/4-chickens.jpg)
+![Gamification](images/gamification.jpg)
+![Royal Bro](images/royalbro.jpg)
+![more diagrams!](images/diagram.jpg)
+
+**Built by Shadow Chickens** 🥷🐔
