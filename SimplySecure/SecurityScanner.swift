@@ -36,7 +36,7 @@ class SecurityScanner: ObservableObject {
             // Scan 1: OS Updates
             DispatchQueue.main.async {
                 self.currentScanStep = "Checking OS Updates..."
-                self.scanProgress = 0.33
+                self.scanProgress = 0.16
             }
             let osResult = self.checkOSUpdates()
             DispatchQueue.main.async {
@@ -47,7 +47,7 @@ class SecurityScanner: ObservableObject {
             // Scan 2: FileVault
             DispatchQueue.main.async {
                 self.currentScanStep = "Checking FileVault Encryption..."
-                self.scanProgress = 0.66
+                self.scanProgress = 0.33
             }
             let fileVaultResult = self.checkFileVault()
             DispatchQueue.main.async {
