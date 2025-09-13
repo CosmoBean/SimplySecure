@@ -110,6 +110,14 @@ struct ContentView: View {
                 }
             }
             .frame(minWidth: 600, minHeight: 500)
+            .onAppear {
+                // Connect SecurityScanner with NinjaGameModel for XP awarding
+                NSLog("📱 ContentView: onAppear called")
+                NSLog("📱 ContentView: SecurityScanner gameModel before: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
+                securityScanner.gameModel = gameModel
+                NSLog("📱 ContentView: SecurityScanner gameModel after: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
+                NSLog("📱 ContentView: GameModel currentXP: \(gameModel.currentXP)")
+            }
         }
     }
     
@@ -178,10 +186,26 @@ struct DashboardView: View {
                 Text("\(gameModel.currentXP) XP")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .onAppear {
+                        NSLog("📱 DashboardView: Header XP display appeared with \(gameModel.currentXP) XP")
+                    }
+                    .onChange(of: gameModel.currentXP) { newValue in
+                        NSLog("📱 DashboardView: Header XP changed to \(newValue)")
+                    }
                 
                 Text("Test: \(testCounter)")
                     .font(.caption)
                     .foregroundColor(.red)
+                
+                Button("+50 XP Test") {
+                    NSLog("🧪 Manual XP test button clicked")
+                    gameModel.addXP(50)
+                }
+                .font(.caption)
+                .padding(4)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(4)
             }
             
             Spacer()
@@ -353,7 +377,9 @@ struct DashboardView: View {
                 
                 if !result.passed {
                     Button("Test Again") {
-                        print("🔧 ContentView: Test Again clicked for \(result.name)")
+                        NSLog("🔧 ContentView: Test Again clicked for \(result.name)")
+                        NSLog("🔧 ContentView: Current XP before retest: \(gameModel.currentXP)")
+                        NSLog("🔧 ContentView: SecurityScanner gameModel reference: \(securityScanner.gameModel != nil ? "EXISTS" : "NIL")")
                         // Re-run the specific security check
                         securityScanner.retestSpecificCheck(result.name)
                     }
