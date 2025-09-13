@@ -14,6 +14,7 @@ struct ContentView: View {
         case reports = "Reports"
         case terminal = "Terminal Test"
         case gemini = "AI Assistant"
+        case quiz = "Security Quiz"
     }
     
     var body: some View {
@@ -123,6 +124,8 @@ struct ContentView: View {
                 TerminalTestView()
             case .gemini:
                 GeminiTestView()
+            case .quiz:
+                QuizView(gameModel: gameModel)
             }
         }
         .frame(minWidth: 600, minHeight: 500)
@@ -146,6 +149,7 @@ struct ContentView: View {
         case .reports: return "chart.bar.fill"
         case .terminal: return "terminal.fill"
         case .gemini: return "brain.head.profile"
+        case .quiz: return "questionmark.circle.fill"
         }
     }
     

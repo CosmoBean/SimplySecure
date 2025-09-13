@@ -14,6 +14,10 @@
 		I1234567890ABCDEF1234567 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = J1234567890ABCDEF1234567 /* Assets.xcassets */; };
 		AA1234567890ABCDEF1234567 /* GeminiAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1234567890ABCDEF1234567 /* GeminiAPIService.swift */; };
 		CC1234567890ABCDEF1234567 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1234567890ABCDEF1234567 /* User.swift */; };
+		EE1234567890ABCDEF1234567 /* QuizModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1234567890ABCDEF1234567 /* QuizModels.swift */; };
+		GG1234567890ABCDEF1234567 /* QuizService.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH1234567890ABCDEF1234567 /* QuizService.swift */; };
+		II1234567890ABCDEF1234567 /* QuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJ1234567890ABCDEF1234567 /* QuizView.swift */; };
+		KK1234567890ABCDEF1234567 /* QuizAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL1234567890ABCDEF1234567 /* QuizAnimations.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +28,10 @@
 		J1234567890ABCDEF1234567 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB1234567890ABCDEF1234567 /* GeminiAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiAPIService.swift; sourceTree = "<group>"; };
 		DD1234567890ABCDEF1234567 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		FF1234567890ABCDEF1234567 /* QuizModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizModels.swift; sourceTree = "<group>"; };
+		HH1234567890ABCDEF1234567 /* QuizService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizService.swift; sourceTree = "<group>"; };
+		JJ1234567890ABCDEF1234567 /* QuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizView.swift; sourceTree = "<group>"; };
+		LL1234567890ABCDEF1234567 /* QuizAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizAnimations.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +62,10 @@
 				H1234567890ABCDEF1234567 /* NinjaGameModel.swift */,
 				BB1234567890ABCDEF1234567 /* GeminiAPIService.swift */,
 				DD1234567890ABCDEF1234567 /* User.swift */,
+				FF1234567890ABCDEF1234567 /* QuizModels.swift */,
+				HH1234567890ABCDEF1234567 /* QuizService.swift */,
+				JJ1234567890ABCDEF1234567 /* QuizView.swift */,
+				LL1234567890ABCDEF1234567 /* QuizAnimations.swift */,
 				J1234567890ABCDEF1234567 /* Assets.xcassets */,
 				L1234567890ABCDEF1234567 /* Info.plist */,
 			);
@@ -143,6 +155,10 @@
 				G1234567890ABCDEF1234567 /* NinjaGameModel.swift in Sources */,
 				AA1234567890ABCDEF1234567 /* GeminiAPIService.swift in Sources */,
 				CC1234567890ABCDEF1234567 /* User.swift in Sources */,
+				EE1234567890ABCDEF1234567 /* QuizModels.swift in Sources */,
+				GG1234567890ABCDEF1234567 /* QuizService.swift in Sources */,
+				II1234567890ABCDEF1234567 /* QuizView.swift in Sources */,
+				KK1234567890ABCDEF1234567 /* QuizAnimations.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
