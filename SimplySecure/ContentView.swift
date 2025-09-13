@@ -70,7 +70,7 @@ struct ContentView: View {
                             Text("Security Score")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text("\(securityScanner.totalScore)/100")
+                            Text("\(securityScanner.totalScore)/140")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(securityScoreColor)
@@ -124,7 +124,7 @@ struct ContentView: View {
     
     private var securityScoreColor: Color {
         switch securityScanner.totalScore {
-        case 80...100: return .green
+        case 120...140: return .green
         case 60..<80: return .orange
         default: return .red
         }
@@ -203,13 +203,13 @@ struct DashboardView: View {
                 
                 Spacer()
                 
-                Text("\(securityScanner.totalScore)/120")
+                Text("\(securityScanner.totalScore)/140")
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(securityScoreColor)
             }
             
-            ProgressView(value: Double(securityScanner.totalScore), total: 120)
+            ProgressView(value: Double(securityScanner.totalScore), total: 140)
                 .progressViewStyle(LinearProgressViewStyle(tint: securityScoreColor))
                 .frame(height: 8)
             
@@ -415,8 +415,8 @@ struct DashboardView: View {
     // MARK: - Computed Properties
     private var securityScoreColor: Color {
         switch securityScanner.totalScore {
-        case 100...120: return .green
-        case 80..<100: return .orange
+        case 120...140: return .green
+        case 100..<120: return .orange
         case 60..<80: return .yellow
         default: return .red
         }
@@ -424,8 +424,8 @@ struct DashboardView: View {
     
     private var securityScoreMessage: String {
         switch securityScanner.totalScore {
-        case 100...120: return "Excellent security posture! 🥷"
-        case 80..<100: return "Good security, but room for improvement"
+        case 120...140: return "Excellent security posture! 🥷"
+        case 100..<120: return "Good security, but room for improvement"
         case 60..<80: return "Security needs attention"
         case 40..<60: return "Multiple security issues detected"
         default: return "Critical security issues detected!"
@@ -628,7 +628,7 @@ struct ReportsView: View {
                     Text("Overall Score")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text("\(securityScanner.totalScore)/100")
+                    Text("\(securityScanner.totalScore)/140")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(overallScoreColor)
@@ -801,7 +801,7 @@ struct ReportsView: View {
     
     private var overallScoreColor: Color {
         switch securityScanner.totalScore {
-        case 80...100: return .green
+        case 120...140: return .green
         case 60..<80: return .orange
         default: return .red
         }
