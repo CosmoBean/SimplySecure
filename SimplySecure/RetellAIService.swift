@@ -660,6 +660,20 @@ class RetellAIService: ObservableObject {
             }
         }
         
+        // Check if call has ended but no transcript was found
+        let finalStatusCheck = await getCallTranscription(callId: callId)
+        if finalStatusCheck && (lastTranscription?.isEmpty ?? true) {
+            let isCallEnded = callStatus.lowercased().contains("ended") ||
+                             callStatus.lowercased().contains("finished") ||
+                             callStatus.lowercased().contains("completed")
+            
+            if isCallEnded {
+                NSLog("🔴 PHISHING SIMULATION: Call has ended but no transcript found. Providing fake feedback...")
+                await provideFakePhishingFeedback()
+                return
+            }
+        }
+        
         NSLog("⚠️ PHISHING SIMULATION: Timeout reached. Transcription may not be ready yet.")
     }
     
@@ -705,39 +719,56 @@ class RetellAIService: ObservableObject {
         }
     }
     
+    /// Provide fake phishing feedback when no transcript is available after call completion
+    private func provideFakePhishingFeedback() async {
+        NSLog("🔴 FAKE FEEDBACK: Generating fake phishing analysis...")
+        
+        await MainActor.run {
+            isAnalyzingTranscript = true
+            phishingAnalysis = ""
+        }
+        
+        // Generate realistic fake feedback based on common phishing scenarios
+        let fakeFeedback = """
+        **Phishing Analysis - No Transcript Available**
+        
+        **Phishing Techniques Used**: 
+        The simulated phishing call likely employed common social engineering tactics such as urgency creation, authority impersonation, and fear-based manipulation. Without transcript access, we cannot determine the specific techniques used, but typical approaches include impersonating legitimate organizations, creating false urgency, and requesting sensitive information.
+        
+        **Effectiveness Assessment**: 
+        The call appears to have completed, suggesting some level of engagement occurred. However, the lack of transcript data prevents detailed analysis of the interaction's success rate or victim response patterns.
+        
+        **Key Vulnerabilities**: 
+        Common vulnerabilities in phishing scenarios include lack of awareness about social engineering tactics, insufficient verification procedures, and emotional decision-making under pressure. Users should be trained to verify caller identity through independent channels and never provide sensitive information over unsolicited calls.
+        
+        **Recommendations**: 
+        Implement comprehensive security awareness training focusing on phone-based social engineering. Establish clear protocols for handling suspicious calls, including verification procedures and escalation processes. Consider implementing caller ID verification and recording capabilities for security analysis.
+        
+        *Note: This analysis is based on simulated data as no transcript was available for the completed call.*
+        """
+        
+        await MainActor.run {
+            isAnalyzingTranscript = false
+            phishingAnalysis = fakeFeedback
+            NSLog("✅ FAKE FEEDBACK: Fake analysis generated successfully")
+            NSLog("🔴 FAKE FEEDBACK: \(fakeFeedback)")
+        }
+    }
+    
     // MARK: - Private Methods
     
     private func makeCreateCallRequest(fromNumber: String, toNumber: String) async throws -> RetellCallResponse {
-        // Try different possible endpoints
-        let possibleEndpoints = [
-            "\(baseURL)/v2/create-phone-call",
-            "\(baseURL)/v1/calls",
-            "\(baseURL)/calls"
-        ]
+        // Use the correct v2 API endpoint for creating phone calls
+        let endpoint = "\(baseURL)/v2/create-phone-call"
         
-        var lastError: Error?
-        
-        for endpoint in possibleEndpoints {
-            guard let url = URL(string: endpoint) else {
-                NSLog("❌ RetellAI: Invalid URL for endpoint: \(endpoint)")
-                continue
-            }
-            
-            NSLog("🔴 RetellAI: Trying endpoint: \(endpoint)")
-            
-            do {
-                let response = try await makeRequestToURL(url, fromNumber: fromNumber, toNumber: toNumber)
-                NSLog("✅ RetellAI: Success with endpoint: \(endpoint)")
-                return response
-            } catch {
-                NSLog("❌ RetellAI: Failed with endpoint \(endpoint): \(error)")
-                lastError = error
-                continue
-            }
+        guard let url = URL(string: endpoint) else {
+            NSLog("❌ RetellAI: Invalid URL for endpoint: \(endpoint)")
+            throw RetellAIError.invalidURL
         }
         
-        // If all endpoints failed, throw the last error
-        throw lastError ?? RetellAIError.invalidURL
+        NSLog("🔴 RetellAI: Creating call using endpoint: \(endpoint)")
+        
+        return try await makeRequestToURL(url, fromNumber: fromNumber, toNumber: toNumber)
     }
     
     private func makeRequestToURL(_ url: URL, fromNumber: String, toNumber: String) async throws -> RetellCallResponse {
@@ -789,56 +820,44 @@ class RetellAIService: ObservableObject {
     }
     
     private func makeGetCallRequest(callId: String) async throws -> RetellCallResponse {
-        // Try different possible endpoints for getting call details
-        let possibleEndpoints = [
-            "\(baseURL)/v2/get-call/\(callId)",
-            "\(baseURL)/calls/\(callId)"
-        ]
+        // Use the correct v2 API endpoint as per documentation
+        let endpoint = "\(baseURL)/v2/get-call/\(callId)"
         
-        var lastError: Error?
-        
-        for endpoint in possibleEndpoints {
-            guard let url = URL(string: endpoint) else {
-                NSLog("❌ RetellAI: Invalid URL for endpoint: \(endpoint)")
-                continue
-            }
-            
-            NSLog("🔴 RetellAI: Trying GET endpoint: \(endpoint)")
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.httpMethod = "GET"
-            urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            
-            do {
-                let (data, response) = try await URLSession.shared.data(for: urlRequest)
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    NSLog("❌ RetellAI: Invalid response type for endpoint: \(endpoint)")
-                    continue
-                }
-                
-                NSLog("🔴 RetellAI: GET response status: \(httpResponse.statusCode) for endpoint: \(endpoint)")
-                
-                guard httpResponse.statusCode == 200 else {
-                    let responseString = String(data: data, encoding: .utf8) ?? "No response body"
-                    NSLog("❌ RetellAI: GET error response body: \(responseString)")
-                    let errorMessage = "HTTP \(httpResponse.statusCode): \(responseString)"
-                    lastError = RetellAIError.apiError(httpResponse.statusCode, errorMessage)
-                    continue
-                }
-                
-                let callDetails = try JSONDecoder().decode(RetellCallResponse.self, from: data)
-                NSLog("✅ RetellAI: Successfully retrieved call details from endpoint: \(endpoint)")
-                return callDetails
-            } catch {
-                NSLog("❌ RetellAI: Failed to get call details from endpoint \(endpoint): \(error)")
-                lastError = error
-                continue
-            }
+        guard let url = URL(string: endpoint) else {
+            NSLog("❌ RetellAI: Invalid URL for endpoint: \(endpoint)")
+            throw RetellAIError.invalidURL
         }
         
-        // If all endpoints failed, throw the last error
-        throw lastError ?? RetellAIError.invalidURL
+        NSLog("🔴 RetellAI: Getting call details from endpoint: \(endpoint)")
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "GET"
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: urlRequest)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                NSLog("❌ RetellAI: Invalid response type")
+                throw RetellAIError.invalidResponse
+            }
+            
+            NSLog("🔴 RetellAI: GET response status: \(httpResponse.statusCode) for endpoint: \(endpoint)")
+            
+            guard httpResponse.statusCode == 200 else {
+                let responseString = String(data: data, encoding: .utf8) ?? "No response body"
+                NSLog("❌ RetellAI: GET error response body: \(responseString)")
+                let errorMessage = "HTTP \(httpResponse.statusCode): \(responseString)"
+                throw RetellAIError.apiError(httpResponse.statusCode, errorMessage)
+            }
+            
+            let callDetails = try JSONDecoder().decode(RetellCallResponse.self, from: data)
+            NSLog("✅ RetellAI: Successfully retrieved call details")
+            return callDetails
+        } catch {
+            NSLog("❌ RetellAI: Failed to get call details: \(error)")
+            throw error
+        }
     }
 }
 
