@@ -6,7 +6,7 @@ struct SimplySecureApp: App {
         WindowGroup {
             ContentView()
         }
-        .windowStyle(.hiddenTitleBar)
+        .windowStyle(DefaultWindowStyle())
         .windowResizability(.contentSize)
     }
 }

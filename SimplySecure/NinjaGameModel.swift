@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Ninja Level System
 enum NinjaLevel: String, CaseIterable {
@@ -6,15 +7,7 @@ enum NinjaLevel: String, CaseIterable {
     case apprentice = "Apprentice Ninja"
     case master = "Master Ninja"
     
-    var levelNumber: Int {
-        switch self {
-        case .novice: return 1
-        case .apprentice: return 2
-        case .master: return 3
-        }
-    }
-    
-    var requiredXP: Int {
+    var xpThreshold: Int {
         switch self {
         case .novice: return 0
         case .apprentice: return 200
@@ -30,18 +23,18 @@ enum NinjaLevel: String, CaseIterable {
         }
     }
     
-    var color: String {
+    var color: Color {
         switch self {
-        case .novice: return "gray"
-        case .apprentice: return "red"
-        case .master: return "black"
+        case .novice: return .gray
+        case .apprentice: return .red
+        case .master: return .black
         }
     }
 }
 
-// MARK: - Mission Model
-struct Mission {
-    let id: String
+// MARK: - Mission System
+struct Mission: Identifiable {
+    let id = UUID()
     let title: String
     let description: String
     let xpReward: Int
@@ -51,24 +44,31 @@ struct Mission {
 
 // MARK: - Ninja Game Model
 class NinjaGameModel: ObservableObject {
-    @Published var currentXP: Int = 0
-    @Published var currentLevel: NinjaLevel = .novice
-    @Published var missions: [Mission] = []
+    @AppStorage("currentXP") var currentXP: Int = 0
+    @AppStorage("currentLevel") var currentLevelRaw: String = NinjaLevel.novice.rawValue
     
-    init() {
-        loadGameData()
+    var currentLevel: NinjaLevel {
+        get { NinjaLevel(rawValue: currentLevelRaw) ?? .novice }
+        set { currentLevelRaw = newValue.rawValue }
     }
     
-    // MARK: - XP and Level Management
-    func addXP(_ points: Int) {
-        currentXP += points
+    var progressToNextLevel: Double {
+        let currentLevelXP = currentLevel.xpThreshold
+        let nextLevelXP = currentLevel.nextLevelXP
+        let progressXP = currentXP - currentLevelXP
+        let totalXPNeeded = nextLevelXP - currentLevelXP
+        
+        return totalXPNeeded > 0 ? Double(progressXP) / Double(totalXPNeeded) : 1.0
+    }
+    
+    func addXP(_ xp: Int) {
+        currentXP += xp
         checkLevelUp()
-        saveGameData()
     }
     
     private func checkLevelUp() {
         let newLevel = NinjaLevel.allCases.last { level in
-            currentXP >= level.requiredXP
+            currentXP >= level.xpThreshold
         } ?? .novice
         
         if newLevel != currentLevel {
@@ -76,60 +76,15 @@ class NinjaGameModel: ObservableObject {
         }
     }
     
-    func getXPProgress() -> Double {
-        let currentLevelXP = currentXP - currentLevel.requiredXP
-        let nextLevelXP = currentLevel.nextLevelXP - currentLevel.requiredXP
-        return Double(currentLevelXP) / Double(nextLevelXP)
-    }
-    
-    // MARK: - Mission Management
-    func updateMissions(from scanResults: [SecurityScanResult]) {
-        missions = scanResults.map { result in
+    func createMissions(from scanResults: [SecurityScanResult]) -> [Mission] {
+        return scanResults.map { result in
             Mission(
-                id: result.name,
                 title: result.name,
                 description: result.message,
-                xpReward: result.points,
+                xpReward: result.passed ? 0 : 100,
                 isCompleted: result.passed,
                 fixInstructions: result.fixInstructions
             )
         }
-    }
-    
-    func completeMission(_ missionId: String) {
-        if let index = missions.firstIndex(where: { $0.id == missionId }) {
-            let mission = missions[index]
-            if !mission.isCompleted {
-                addXP(mission.xpReward)
-                missions[index] = Mission(
-                    id: mission.id,
-                    title: mission.title,
-                    description: mission.description,
-                    xpReward: mission.xpReward,
-                    isCompleted: true,
-                    fixInstructions: mission.fixInstructions
-                )
-            }
-        }
-    }
-    
-    // MARK: - Data Persistence
-    private func saveGameData() {
-        UserDefaults.standard.set(currentXP, forKey: "ninjaXP")
-        UserDefaults.standard.set(currentLevel.rawValue, forKey: "ninjaLevel")
-    }
-    
-    private func loadGameData() {
-        currentXP = UserDefaults.standard.integer(forKey: "ninjaXP")
-        let levelString = UserDefaults.standard.string(forKey: "ninjaLevel") ?? NinjaLevel.novice.rawValue
-        currentLevel = NinjaLevel(rawValue: levelString) ?? .novice
-    }
-    
-    // MARK: - Reset Game (for demo purposes)
-    func resetGame() {
-        currentXP = 0
-        currentLevel = .novice
-        missions = []
-        saveGameData()
     }
 }
