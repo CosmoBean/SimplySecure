@@ -119,7 +119,7 @@ class SecurityScanner: ObservableObject {
     
     private func checkOSUpdates() -> SecurityScanResult {
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/softwareupdate")
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/softwareupdate")
         task.arguments = ["--list"]
         
         let pipe = Pipe()
@@ -188,6 +188,7 @@ class SecurityScanner: ObservableObject {
     }
     
     private func checkFileVault() -> SecurityScanResult {
+        print("🔥🔥🔥 UPDATED FILEVAULT CHECK FUNCTION CALLED - VERSION 2.0 🔥🔥🔥")
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/fdesetup")
         task.arguments = ["status"]
@@ -206,12 +207,15 @@ class SecurityScanner: ObservableObject {
             let output = String(data: data, encoding: .utf8) ?? ""
             let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
             
-            print("🥷 FileVault - Output: \(output)")
-            print("🥷 FileVault - Error: \(errorOutput)")
+            print("🥷 FileVault - Output: '\(output)'")
+            print("🥷 FileVault - Error: '\(errorOutput)'")
             print("🥷 FileVault - Exit code: \(task.terminationStatus)")
+            print("🥷 FileVault - Output length: \(output.count)")
+            print("🥷 FileVault - Contains 'FileVault is On': \(output.contains("FileVault is On"))")
             
             // Check for FileVault enabled status
             if output.contains("FileVault is On") {
+                print("🔥🔥🔥 FILEVAULT DETECTED AS ON - SHOULD PASS! 🔥🔥🔥")
                 return SecurityScanResult(
                     name: "FileVault Encryption",
                     passed: true,

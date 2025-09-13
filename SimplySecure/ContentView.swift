@@ -354,6 +354,7 @@ struct DashboardView: View {
                 if !result.passed {
                     Button("Test Again") {
                         print("🔧 ContentView: Test Again clicked for \(result.name)")
+                        // Re-run the specific security check
                         securityScanner.performSecurityScan()
                     }
                     .font(.caption)

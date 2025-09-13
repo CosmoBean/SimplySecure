@@ -10,7 +10,7 @@
 	<true/>
 	<key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
 	<array>
-		<string>/usr/bin/softwareupdate</string>
+                    <string>/usr/sbin/softwareupdate</string>
 		<string>/usr/bin/fdesetup</string>
 		<string>/usr/libexec/ApplicationFirewall/socketfilterfw</string>
 		<string>/usr/sbin/spctl</string>
@@ -19,7 +19,7 @@
 	</array>
 	<key>com.apple.security.temporary-exception.files.absolute-path.read-write</key>
 	<array>
-		<string>/usr/bin/softwareupdate</string>
+                    <string>/usr/sbin/softwareupdate</string>
 		<string>/usr/bin/fdesetup</string>
 		<string>/usr/libexec/ApplicationFirewall/socketfilterfw</string>
 		<string>/usr/sbin/spctl</string>
