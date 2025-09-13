@@ -1413,7 +1413,7 @@ struct GeminiTestView: View {
                 Image(systemName: "brain.head.profile")
                     .font(.title)
                     .foregroundColor(.purple)
-                Text("AI Assistant (Gemini)")
+                Text("AI Assistant (Beta)")
                     .font(.title)
                     .fontWeight(.bold)
             }

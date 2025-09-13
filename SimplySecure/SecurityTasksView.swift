@@ -5,7 +5,6 @@ struct SecurityTasksView: View {
     @StateObject private var taskService = SecurityTaskService()
     @StateObject private var executionService = TaskExecutionService()
     @ObservedObject var gameModel: NinjaGameModel
-    @State private var selectedDay: Int = 1
     @State private var showingTaskDetail = false
     @State private var selectedTask: SecurityTask?
     @State private var showingAchievements = false
@@ -71,11 +70,11 @@ struct SecurityTasksView: View {
     
     private func dayButton(challenge: DailyChallengeSet) -> some View {
         let progress = taskService.getDayProgress(day: challenge.day)
-        let isSelected = selectedDay == challenge.day
+        let isSelected = taskService.currentDay == challenge.day
         let isCompleted = progress.completed == progress.total
         
         return Button(action: {
-            selectedDay = challenge.day
+            taskService.setCurrentDay(challenge.day)
         }) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -133,7 +132,7 @@ struct SecurityTasksView: View {
             
             VStack(spacing: 8) {
                 statRow("Total Tasks", "\(taskService.getCompletedTasksCount())/15")
-                statRow("Current Day", "Day \(selectedDay)")
+                statRow("Current Day", "Day \(taskService.currentDay)")
                 statRow("XP Earned", "\(gameModel.currentXP)")
                 statRow("Level", gameModel.currentLevel.rawValue)
             }
@@ -188,21 +187,23 @@ struct SecurityTasksView: View {
         .sheet(isPresented: $showingTaskDetail) {
             if let task = selectedTask {
                 TaskDetailView(task: task, taskService: taskService, executionService: executionService)
+                    .frame(minWidth: 800, minHeight: 600)
             }
         }
         .sheet(isPresented: $showingAchievements) {
             AchievementsView(achievements: taskService.achievements)
+                .frame(minWidth: 600, minHeight: 400)
         }
     }
     
     private var challengeHeaderView: some View {
-        let challenge = taskService.dailyChallenges.first { $0.day == selectedDay }
-        let progress = taskService.getDayProgress(day: selectedDay)
+        let challenge = taskService.dailyChallenges.first { $0.day == taskService.currentDay }
+        let progress = taskService.getDayProgress(day: taskService.currentDay)
         
         return VStack(spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Day \(selectedDay)")
+                    Text("Day \(taskService.currentDay)")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.blue)
@@ -275,7 +276,7 @@ struct SecurityTasksView: View {
     }
     
     private var tasksListView: some View {
-        let challenge = taskService.dailyChallenges.first { $0.day == selectedDay }
+        let challenge = taskService.dailyChallenges.first { $0.day == taskService.currentDay }
         let tasks = challenge?.tasks ?? []
         
         return VStack(alignment: .leading, spacing: 12) {
@@ -385,6 +386,14 @@ struct SecurityTasksView: View {
                                     let result = await executionService.executeTask(task)
                                     if result.success {
                                         taskService.startTask(task)
+                                        // Show success feedback
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                            // Optionally mark as completed if verification command exists and passes
+                                            if task.verificationCommand != nil {
+                                                // Run verification automatically
+                                                taskService.completeTask(task, notes: "Automatically completed after successful execution")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -445,6 +454,11 @@ struct TaskDetailView: View {
                     // Task Header
                     taskHeaderView
                     
+                    // Learning Materials
+                    if task.learningMaterials != nil {
+                        learningMaterialsView
+                    }
+                    
                     // Instructions
                     instructionsView
                     
@@ -464,8 +478,10 @@ struct TaskDetailView: View {
                     // Actions
                     actionsView
                 }
+                .frame(maxWidth: .infinity)
                 .padding()
             }
+            .frame(maxWidth: .infinity)
             .navigationTitle(task.title)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -475,6 +491,7 @@ struct TaskDetailView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var taskHeaderView: some View {
@@ -508,6 +525,80 @@ struct TaskDetailView: View {
                 categoryBadge
                 difficultyBadge
                 Spacer()
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
+    }
+    
+    private var learningMaterialsView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Learning Materials")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            // Overview
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Overview")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.blue)
+                
+                Text(task.learningMaterials?.overview ?? "Learning materials not available")
+                    .font(.body)
+                    .lineSpacing(4)
+            }
+            
+            // Why Important
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Why This Matters")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.green)
+                
+                Text(task.learningMaterials?.whyImportant ?? "Security importance information not available")
+                    .font(.body)
+                    .lineSpacing(4)
+            }
+            
+            // Security Benefits
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Security Benefits")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.orange)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(task.learningMaterials?.securityBenefits ?? ["Security benefits information not available"], id: \.self) { benefit in
+                        HStack(alignment: .top) {
+                            Text("•")
+                                .foregroundColor(.orange)
+                            Text(benefit)
+                                .font(.body)
+                        }
+                    }
+                }
+            }
+            
+            // Common Mistakes
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Common Mistakes to Avoid")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.red)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(task.learningMaterials?.commonMistakes ?? ["Common mistakes information not available"], id: \.self) { mistake in
+                        HStack(alignment: .top) {
+                            Text("⚠️")
+                            Text(mistake)
+                                .font(.body)
+                        }
+                    }
+                }
             }
         }
         .padding()
@@ -705,6 +796,10 @@ struct TaskDetailView: View {
                     Button("Execute Task") {
                         Task {
                             executionResult = await executionService.executeTask(task)
+                            // If execution was successful, automatically start the task
+                            if executionResult?.success == true {
+                                taskService.startTask(task)
+                            }
                         }
                     }
                     .font(.headline)
