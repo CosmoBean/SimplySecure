@@ -1335,7 +1335,7 @@ struct GeminiTestView: View {
                 promptInputView
                 
                 // Settings
-                settingsView
+                // settingsView
                 
                 // Generate Button
                 generateButtonView

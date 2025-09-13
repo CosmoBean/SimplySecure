@@ -87,41 +87,41 @@ struct LoginView: View {
             }
             .padding(.horizontal, 40)
             
-            // Demo Credentials Info
-            VStack(spacing: 12) {
-                Text("Demo Credentials")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
+            // // Demo Credentials Info
+            // VStack(spacing: 12) {
+            //     Text("Demo Credentials")
+            //         .font(.headline)
+            //         .fontWeight(.semibold)
+            //         .foregroundColor(.secondary)
                 
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("Username:")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Text("admin")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                    }
+            //     VStack(spacing: 8) {
+            //         HStack {
+            //             Text("Username:")
+            //                 .font(.subheadline)
+            //                 .foregroundColor(.secondary)
+            //             Text("admin")
+            //                 .font(.subheadline)
+            //                 .fontWeight(.semibold)
+            //                 .foregroundColor(.primary)
+            //         }
                     
-                    HStack {
-                        Text("Password:")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Text("admin")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(NSColor.controlBackgroundColor))
-                )
-            }
-            .padding(.horizontal, 40)
+            //         HStack {
+            //             Text("Password:")
+            //                 .font(.subheadline)
+            //                 .foregroundColor(.secondary)
+            //             Text("admin")
+            //                 .font(.subheadline)
+            //                 .fontWeight(.semibold)
+            //                 .foregroundColor(.primary)
+            //         }
+            //     }
+            //     .padding()
+            //     .background(
+            //         RoundedRectangle(cornerRadius: 8)
+            //             .fill(Color(NSColor.controlBackgroundColor))
+            //     )
+            // }
+            // .padding(.horizontal, 40)
             
             Spacer()
             }

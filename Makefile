@@ -1,4 +1,4 @@
-build:
+build: setup_keys
 	xcodebuild -project SimplySecure.xcodeproj -scheme SimplySecure -configuration Debug build
 run: kill build
 	open /Users/sridatta.bandreddi/Library/Developer/Xcode/DerivedData/SimplySecure-fuklfyarwyekmvdxuwtmjiqveytk/Build/Products/Debug/SimplySecure.app
@@ -7,3 +7,5 @@ log:
 kill:
 	@echo "Killing SimplySecure app if running..."
 	@pkill -x SimplySecure || true
+setup_keys:
+	./setup_keys.sh
