@@ -14,10 +14,9 @@ struct LoginView: View {
                 Spacer()
             // App Logo and Title
             VStack(spacing: 16) {
-                Image("logobro")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 300, height: 300)
+                Image(systemName: "shield.checkered")
+                    .font(.system(size: 120))
+                    .foregroundColor(.red)
                 
                 Text("SimplySecure")
                     .font(.largeTitle)
@@ -30,30 +29,50 @@ struct LoginView: View {
             }
             
             // Login Form
-            VStack(spacing: 20) {
-                VStack(alignment: .center, spacing: 8) {
+            VStack(spacing: 16) {
+                VStack(spacing: 8) {
                     Text("Username")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     
                     TextField("Enter username", text: $username)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(.title2, design: .default))
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .font(.body)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(NSColor.controlBackgroundColor))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                        )
                         .disableAutocorrection(true)
-                        .frame(height: 100)
                 }
                 
-                VStack(alignment: .center, spacing: 8) {
+                VStack(spacing: 8) {
                     Text("Password")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     
                     SecureField("Enter password", text: $password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(.title2, design: .default))
-                        .frame(height: 100)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .font(.body)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(NSColor.controlBackgroundColor))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                        )
                 }
                 
                 // Error Message
@@ -61,40 +80,48 @@ struct LoginView: View {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.red)
+                            .font(.caption)
                         Text(errorMessage)
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundColor(.red)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: 6)
                             .fill(Color.red.opacity(0.1))
                     )
-                    .multilineTextAlignment(.center)
                 }
                 
                 // Login Button
                 Button(action: login) {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "person.badge.key.fill")
-                            .font(.title2)
+                            .font(.subheadline)
                         Text("Login")
-                            .font(.title2)
+                            .font(.subheadline)
                             .fontWeight(.semibold)
                     }
                     .foregroundColor(.white)
-                    .padding(.vertical, 20)
-                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 24)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 8)
                             .fill(Color.red)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(username.isEmpty || password.isEmpty)
+                .opacity(username.isEmpty || password.isEmpty ? 0.6 : 1.0)
             }
-            .padding(.horizontal, 250)
+            .padding(.horizontal, 40)
+            .padding(.vertical, 32)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(NSColor.windowBackgroundColor))
+                    .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+            )
+            .frame(width: 320)
             
             // // Demo Credentials Info
             // VStack(spacing: 12) {
