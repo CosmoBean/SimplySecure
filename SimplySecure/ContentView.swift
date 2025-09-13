@@ -376,11 +376,12 @@ struct DashboardView: View {
                             NSLog("🎮 Demo: Reset XP button clicked")
                             gameModel.resetUserXP()
                         }
-                        .font(.caption2)
-                        .padding(2)
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .padding(8)
                         .background(Color.red)
                         .foregroundColor(.white)
-                        .cornerRadius(3)
+                        .cornerRadius(8)
                         
                         Button("Set Apprentice") {
                             NSLog("🎮 Demo: Set Apprentice button clicked")

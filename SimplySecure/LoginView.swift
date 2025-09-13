@@ -11,11 +11,13 @@ struct LoginView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 30) {
+                Spacer()
             // App Logo and Title
             VStack(spacing: 16) {
-                Image(systemName: "shield.checkered")
-                    .font(.system(size: 80))
-                    .foregroundColor(.red)
+                Image("logobro")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 300, height: 300)
                 
                 Text("SimplySecure")
                     .font(.largeTitle)
@@ -29,27 +31,29 @@ struct LoginView: View {
             
             // Login Form
             VStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .center, spacing: 8) {
                     Text("Username")
-                        .font(.headline)
+                        .font(.title2)
+                        .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
                     TextField("Enter username", text: $username)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(.body, design: .default))
+                        .font(.system(.title2, design: .default))
                         .disableAutocorrection(true)
-                        .frame(height: 50)
+                        .frame(height: 100)
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .center, spacing: 8) {
                     Text("Password")
-                        .font(.headline)
+                        .font(.title2)
+                        .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
                     SecureField("Enter password", text: $password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.system(.body, design: .default))
-                        .frame(height: 50)
+                        .font(.system(.title2, design: .default))
+                        .frame(height: 100)
                 }
                 
                 // Error Message
@@ -67,17 +71,20 @@ struct LoginView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color.red.opacity(0.1))
                     )
+                    .multilineTextAlignment(.center)
                 }
                 
                 // Login Button
                 Button(action: login) {
                     HStack {
                         Image(systemName: "person.badge.key.fill")
+                            .font(.title2)
                         Text("Login")
+                            .font(.title2)
                             .fontWeight(.semibold)
                     }
                     .foregroundColor(.white)
-                    .padding()
+                    .padding(.vertical, 20)
                     .frame(maxWidth: .infinity)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
@@ -87,7 +94,7 @@ struct LoginView: View {
                 .buttonStyle(PlainButtonStyle())
                 .disabled(username.isEmpty || password.isEmpty)
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 250)
             
             // // Demo Credentials Info
             // VStack(spacing: 12) {
@@ -125,9 +132,10 @@ struct LoginView: View {
             // }
             // .padding(.horizontal, 40)
             
-            Spacer()
+                Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .multilineTextAlignment(.center)
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [
