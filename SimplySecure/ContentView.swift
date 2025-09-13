@@ -355,7 +355,7 @@ struct DashboardView: View {
                     Button("Test Again") {
                         print("🔧 ContentView: Test Again clicked for \(result.name)")
                         // Re-run the specific security check
-                        securityScanner.performSecurityScan()
+                        securityScanner.retestSpecificCheck(result.name)
                     }
                     .font(.caption)
                     .padding(.horizontal, 8)
@@ -377,14 +377,14 @@ struct DashboardView: View {
     // MARK: - Scan Button View
     private var scanButtonView: some View {
         Button(action: {
-            print("🥷 ContentView: Scan button clicked!")
-            print("🥷 ContentView: Current isScanning: \(securityScanner.isScanning)")
-            print("🥷 ContentView: Test counter before: \(testCounter)")
+            NSLog("🥷 ContentView: Scan button clicked!")
+            NSLog("🥷 ContentView: Current isScanning: \(securityScanner.isScanning)")
+            NSLog("🥷 ContentView: Test counter before: \(testCounter)")
             testCounter += 1
-            print("🥷 ContentView: Test counter after: \(testCounter)")
-            print("🥷 ContentView: About to call performSecurityScan()")
+            NSLog("🥷 ContentView: Test counter after: \(testCounter)")
+            NSLog("🥷 ContentView: About to call performSecurityScan()")
             securityScanner.performSecurityScan()
-            print("🥷 ContentView: performSecurityScan() called")
+            NSLog("🥷 ContentView: performSecurityScan() called")
         }) {
             HStack {
                 if securityScanner.isScanning {

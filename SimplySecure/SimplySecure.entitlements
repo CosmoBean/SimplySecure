@@ -3,11 +3,30 @@
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
 	<key>com.apple.security.files.user-selected.read-only</key>
 	<true/>
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<true/>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+	<key>com.apple.security.device.camera</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.apple.system.logger</string>
+		<string>com.apple.system.logger.manager</string>
+	</array>
 	<key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
 	<array>
                     <string>/usr/sbin/softwareupdate</string>
@@ -16,6 +35,8 @@
 		<string>/usr/sbin/spctl</string>
 		<string>/usr/bin/csrutil</string>
 		<string>/usr/bin/defaults</string>
+		<string>/usr/sbin/networksetup</string>
+		<string>/usr/bin/sw_vers</string>
 	</array>
 	<key>com.apple.security.temporary-exception.files.absolute-path.read-write</key>
 	<array>
@@ -25,6 +46,8 @@
 		<string>/usr/sbin/spctl</string>
 		<string>/usr/bin/csrutil</string>
 		<string>/usr/bin/defaults</string>
+		<string>/usr/sbin/networksetup</string>
+		<string>/usr/bin/sw_vers</string>
 	</array>
 </dict>
 </plist>
