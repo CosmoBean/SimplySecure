@@ -148,7 +148,8 @@ class QuizService: ObservableObject {
         4. Clear and concise with 4 answer options each
         5. Include detailed explanations for the correct answers
         
-        Return your response as a JSON object with this exact structure:
+        IMPORTANT: Return ONLY a valid JSON object with this exact structure. Do not include any explanatory text before or after the JSON:
+        
         {
             "questions": [
                 {
@@ -163,7 +164,13 @@ class QuizService: ObservableObject {
             ]
         }
         
-        Make sure the JSON is valid and properly formatted. The correctAnswer should be the 0-based index of the correct option.
+        CRITICAL REQUIREMENTS:
+        1. Return ONLY the JSON object, no markdown formatting, no code blocks
+        2. The correctAnswer must be 0, 1, 2, or 3 (0-based index)
+        3. Each question must have exactly 4 options
+        4. Difficulty must be exactly: "Easy", "Medium", or "Hard"
+        5. Category must be exactly: "General Security", "FileVault", "Firewall", "Privacy", "Encryption", "Authentication", "Networking", or "System Security"
+        6. Points must match the difficulty: Easy=10, Medium=20, Hard=30
         """
     }
     
@@ -195,10 +202,20 @@ class QuizService: ObservableObject {
         do {
             let response = try JSONDecoder().decode(QuizGenerationResponse.self, from: jsonData)
             print("✅ Successfully parsed \(response.questions.count) questions")
-            return response.questions.compactMap { generatedQuestion in
+            
+            let validQuestions: [QuizQuestion] = response.questions.compactMap { generatedQuestion -> QuizQuestion? in
                 guard let difficulty = QuizDifficulty(rawValue: generatedQuestion.difficulty),
                       let category = QuizCategory(rawValue: generatedQuestion.category) else {
                     print("❌ Invalid difficulty or category: \(generatedQuestion.difficulty), \(generatedQuestion.category)")
+                    return nil
+                }
+                
+                // Validate question structure
+                guard !generatedQuestion.question.isEmpty,
+                      generatedQuestion.options.count == 4,
+                      generatedQuestion.correctAnswer >= 0 && generatedQuestion.correctAnswer < 4,
+                      !generatedQuestion.explanation.isEmpty else {
+                    print("❌ Invalid question structure: \(generatedQuestion.question.prefix(50))...")
                     return nil
                 }
                 
@@ -212,43 +229,77 @@ class QuizService: ObservableObject {
                     points: generatedQuestion.points
                 )
             }
+            
+            guard !validQuestions.isEmpty else {
+                throw QuizError.parsingError("No valid questions found in AI response")
+            }
+            
+            print("✅ Created \(validQuestions.count) valid questions")
+            return validQuestions
+            
         } catch {
             print("❌ JSON parsing error: \(error)")
             print("❌ Raw JSON: \(jsonString)")
+            print("❌ JSON Data length: \(jsonData.count) bytes")
+            
+            // Try to provide more specific error information
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    print("❌ Missing key: \(key) at path: \(context.codingPath)")
+                case .valueNotFound(let type, let context):
+                    print("❌ Missing value of type: \(type) at path: \(context.codingPath)")
+                case .typeMismatch(let type, let context):
+                    print("❌ Type mismatch for type: \(type) at path: \(context.codingPath)")
+                case .dataCorrupted(let context):
+                    print("❌ Data corrupted at path: \(context.codingPath)")
+                @unknown default:
+                    print("❌ Unknown decoding error")
+                }
+            }
+            
             throw QuizError.parsingError("Failed to parse quiz response: \(error.localizedDescription)")
         }
     }
     
     private func extractJSONFromResponse(_ response: String) -> String {
-        // Try to find JSON content between ```json and ``` or just pure JSON
-        let lines = response.components(separatedBy: .newlines)
-        var jsonLines: [String] = []
-        var inJsonBlock = false
+        print("🔍 Extracting JSON from response: \(response.prefix(300))...")
         
-        for line in lines {
-            if line.trimmingCharacters(in: .whitespaces).hasPrefix("```json") {
-                inJsonBlock = true
-                continue
-            } else if line.trimmingCharacters(in: .whitespaces).hasPrefix("```") {
-                inJsonBlock = false
-                break
-            } else if inJsonBlock {
-                jsonLines.append(line)
-            } else if line.trimmingCharacters(in: .whitespaces).hasPrefix("{") && !jsonLines.isEmpty {
-                jsonLines.append(line)
-            }
+        // Method 1: Look for JSON in markdown code blocks
+        let jsonPattern = "```(?:json)?\\s*([\\s\\S]*?)```"
+        if let regex = try? NSRegularExpression(pattern: jsonPattern, options: [.caseInsensitive]),
+           let match = regex.firstMatch(in: response, options: [], range: NSRange(location: 0, length: response.utf16.count)),
+           let jsonRange = Range(match.range(at: 1), in: response) {
+            let extracted = String(response[jsonRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+            print("✅ Found JSON in code block: \(extracted.prefix(200))...")
+            return extracted
         }
         
-        if jsonLines.isEmpty {
-            // Try to find JSON content directly
-            if let startIndex = response.firstIndex(of: "{"),
-               let endIndex = response.lastIndex(of: "}") {
-                return String(response[startIndex...endIndex])
-            }
-            return response
+        // Method 2: Look for JSON object directly
+        if let startIndex = response.range(of: "{\"questions\""),
+           let endIndex = response.range(of: "}", range: startIndex.upperBound..<response.endIndex) {
+            let extracted = String(response[startIndex.lowerBound...endIndex.upperBound])
+            print("✅ Found JSON object directly: \(extracted.prefix(200))...")
+            return extracted
         }
         
-        return jsonLines.joined(separator: "\n")
+        // Method 3: Find first { and last } and extract everything between
+        if let firstBrace = response.firstIndex(of: "{"),
+           let lastBrace = response.lastIndex(of: "}"),
+           firstBrace < lastBrace {
+            let extracted = String(response[firstBrace...lastBrace])
+            print("✅ Extracted JSON from braces: \(extracted.prefix(200))...")
+            return extracted
+        }
+        
+        // Method 4: Try to clean up the response and use as-is
+        let cleaned = response
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        print("⚠️ Using cleaned response as JSON: \(cleaned.prefix(200))...")
+        return cleaned
     }
     
     private func calculateScore(answers: [Int?]) -> Int {
